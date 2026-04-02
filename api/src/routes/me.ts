@@ -79,7 +79,7 @@ export default async function meRoutes(app: FastifyInstance) {
       tshirtSize?: string | null
       cricclubsUrl?: string | null
     }
-  }>('/me', async (req: FastifyRequest, reply) => {
+  }>('/me', async (req, reply) => {
     const payload = parseJwtPayload(req)
     if (!payload) return reply.code(401).send({ error: 'Unauthorized' })
     const authUser = { id: payload.sub }
