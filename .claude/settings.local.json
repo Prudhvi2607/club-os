@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npm -v)",
+      "Bash(npx create-next-app@latest web --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(mkdir -p /Users/prudhvi/my-app/api)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(pkill -f \"src/index.ts\")",
+      "Bash(kill %1)",
+      "Bash(node -e \":*)",
+      "Bash(ls /Users/prudhvi/my-app/web/app/\\\\\\(app\\\\\\)/\\\\\\(board\\\\\\)/)"
+    ]
+  }
+}

@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum MemberStatus {
+  active
+  inactive
+  alumni
+}
+
+enum ClubRole {
+  board
+  captain
+  vice_captain
+  member
+  student
+}
+
+enum SeasonStatus {
+  upcoming
+  active
+  completed
+}
+
+enum RegistrationStatus {
+  pending
+  active
+  inactive
+}
+
+enum MemberType {
+  regular
+  student
+  alumni
+}
+
+enum PlayingRole {
+  batter
+  bowler
+  allrounder
+  wicket_keeper
+}
+
+enum PaymentMethod {
+  venmo
+  zelle
+  cash
+}
+
+enum FeeStatus {
+  pending
+  partial
+  paid
+}
+
+enum AnnouncementAudience {
+  club
+  team
+  board
+}
+
+enum DocumentCategory {
+  bylaws
+  code_of_conduct
+  other
+}
+
+enum DocumentVisibility {
+  club
+  board
+}
+
+// ─── Group 1: Users & Club Membership ────────────────────────────────────────
+
+model User {
+  id                            String    @id @default(uuid())
+  supabaseId                    String?   @unique
+  email                         String?   @unique
+  fullName                      String
+  phone                         String?
+  avatarUrl                     String?
+  playingRole                   PlayingRole?
+  emergencyContactName          String?
+  emergencyContactPhone         String?
+  emergencyContactRelationship  String?
+  studentId                     String?
+  studentEmail                  String?
+  studentProgram                String?
+  jerseyNumber                  Int?
+  tshirtSize                    String?
+  cricclubsUrl                  String?
+  createdAt                     DateTime  @default(now())
+
+  clubMemberships     ClubMember[]
+  assignedBy          TeamAssignment[] @relation("AssignedBy")
+  recordedPayments    Payment[]
+  sentAnnouncements   Announcement[]
+  uploadedDocuments   ClubDocument[]
+  createdSeasons      Season[]
+  createdFeeTypes     FeeType[]
+  createdTournaments  Tournament[]
+}
+
+model Club {
+  id        String   @id @default(uuid())
+  name      String
+  sport     String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  members       ClubMember[]
+  seasons       Season[]
+  teams         Team[]
+  announcements Announcement[]
+  documents     ClubDocument[]
+  tournaments   Tournament[]
+  feeTypes      FeeType[]
+  customRoles   ClubCustomRole[]
+}
+
+model ClubMember {
+  id           String       @id @default(uuid())
+  userId       String
+  clubId       String
+  status       MemberStatus @default(active)
+  isMultiClub  Boolean      @default(false)
+  joinedAt     DateTime     @default(now())
+
+  user  User @relation(fields: [userId], references: [id])
+  club  Club @relation(fields: [clubId], references: [id])
+
+  roles              ClubMemberRole[]
+  customRoles        ClubMemberCustomRole[]
+  seasonRegistrations SeasonRegistration[]
+  teamAssignments    TeamAssignment[]
+  memberFees         MemberFee[]
+  paymentRequests    PaymentRequest[]
+  availability       MemberAvailability[]
+
+  @@unique([userId, clubId])
+}
+
+model ClubMemberRole {
+  id           String    @id @default(uuid())
+  clubMemberId String
+  role         ClubRole
+
+  clubMember ClubMember @relation(fields: [clubMemberId], references: [id])
+
+  @@unique([clubMemberId, role])
+}
+
+model ClubCustomRole {
+  id        String   @id @default(uuid())
+  clubId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  club    Club                   @relation(fields: [clubId], references: [id])
+  members ClubMemberCustomRole[]
+
+  @@unique([clubId, name])
+}
+
+model ClubMemberCustomRole {
+  id           String @id @default(uuid())
+  clubMemberId String
+  customRoleId String
+
+  clubMember ClubMember     @relation(fields: [clubMemberId], references: [id], onDelete: Cascade)
+  customRole ClubCustomRole @relation(fields: [customRoleId], references: [id], onDelete: Cascade)
+
+  @@unique([clubMemberId, customRoleId])
+}
+
+// ─── Group 2: Seasons & Registration ─────────────────────────────────────────
+
+model Season {
+  id        String       @id @default(uuid())
+  clubId    String
+  name      String
+  year      Int
+  startDate DateTime
+  endDate   DateTime
+  status    SeasonStatus @default(upcoming)
+  createdBy String
+
+  club          Club                 @relation(fields: [clubId], references: [id])
+  creator       User                 @relation(fields: [createdBy], references: [id])
+  registrations SeasonRegistration[]
+  teamAssignments TeamAssignment[]
+  feeTypes      FeeType[]
+  tournaments   Tournament[]
+  availability  MemberAvailability[]
+}
+
+model SeasonRegistration {
+  id                String             @id @default(uuid())
+  seasonId          String
+  clubMemberId      String
+  memberType        MemberType
+  status            RegistrationStatus @default(pending)
+  availabilityNotes String?
+  registeredAt      DateTime           @default(now())
+
+  season     Season     @relation(fields: [seasonId], references: [id])
+  clubMember ClubMember @relation(fields: [clubMemberId], references: [id])
+}
+
+// ─── Group 3: Teams & Team Assignments ───────────────────────────────────────
+
+model Team {
+  id        String   @id @default(uuid())
+  clubId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  club            Club             @relation(fields: [clubId], references: [id])
+  assignments     TeamAssignment[]
+  announcements   Announcement[]
+  tournamentTeams TournamentTeam[]
+}
+
+model TeamAssignment {
+  id           String    @id @default(uuid())
+  teamId       String
+  seasonId     String
+  clubMemberId String
+  assignedAt   DateTime  @default(now())
+  removedAt    DateTime?
+  assignedById String
+  notes        String?
+
+  team       Team       @relation(fields: [teamId], references: [id])
+  season     Season     @relation(fields: [seasonId], references: [id])
+  clubMember ClubMember @relation(fields: [clubMemberId], references: [id])
+  assignedBy User       @relation("AssignedBy", fields: [assignedById], references: [id])
+}
+
+// ─── Group 4: Tournaments ─────────────────────────────────────────────────────
+
+model Tournament {
+  id          String   @id @default(uuid())
+  clubId      String
+  seasonId    String
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  createdById String
+  createdAt   DateTime @default(now())
+
+  club      Club   @relation(fields: [clubId], references: [id])
+  season    Season @relation(fields: [seasonId], references: [id])
+  createdBy User   @relation(fields: [createdById], references: [id])
+  teams         TournamentTeam[]
+  availability  MemberAvailability[]
+}
+
+model TournamentTeam {
+  id           String @id @default(uuid())
+  tournamentId String
+  teamId       String
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+
+  @@unique([tournamentId, teamId])
+}
+
+// ─── Group 5: Fee Types & Payments ───────────────────────────────────────────
+
+model FeeType {
+  id                  String   @id @default(uuid())
+  clubId              String
+  seasonId            String
+  name                String
+  amount              Decimal
+  studentAmount       Decimal?
+  allowsInstallments  Boolean  @default(false)
+  isRegistrationFee   Boolean  @default(false)
+  createdById         String
+  createdAt           DateTime @default(now())
+
+  club        Club        @relation(fields: [clubId], references: [id])
+  season      Season      @relation(fields: [seasonId], references: [id])
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  memberFees  MemberFee[]
+}
+
+model MemberFee {
+  id           String    @id @default(uuid())
+  feeTypeId    String
+  clubMemberId String
+  amountDue    Decimal
+  amountPaid   Decimal   @default(0)
+  status       FeeStatus @default(pending)
+  createdAt    DateTime  @default(now())
+
+  feeType          FeeType          @relation(fields: [feeTypeId], references: [id])
+  clubMember       ClubMember       @relation(fields: [clubMemberId], references: [id])
+  payments         Payment[]
+  paymentRequests  PaymentRequest[]
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  memberFeeId   String
+  amount        Decimal
+  method        PaymentMethod
+  recordedById  String
+  paidAt        DateTime      @default(now())
+  notes         String?
+
+  memberFee  MemberFee @relation(fields: [memberFeeId], references: [id])
+  recordedBy User      @relation(fields: [recordedById], references: [id])
+}
+
+enum AvailabilityStatus {
+  available
+  partial
+  unavailable
+}
+
+model MemberAvailability {
+  id           String             @id @default(uuid())
+  clubMemberId String
+  seasonId     String
+  tournamentId String
+  status       AvailabilityStatus @default(available)
+  notes        String?
+
+  clubMember ClubMember @relation(fields: [clubMemberId], references: [id])
+  season     Season     @relation(fields: [seasonId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique([clubMemberId, tournamentId])
+}
+
+enum PaymentRequestStatus {
+  pending
+  confirmed
+  rejected
+}
+
+model PaymentRequest {
+  id           String               @id @default(uuid())
+  memberFeeId  String
+  clubMemberId String
+  amount       Decimal
+  method       PaymentMethod
+  notes        String?
+  status       PaymentRequestStatus @default(pending)
+  createdAt    DateTime             @default(now())
+
+  memberFee  MemberFee  @relation(fields: [memberFeeId], references: [id])
+  clubMember ClubMember @relation(fields: [clubMemberId], references: [id])
+}
+
+// ─── Group 6: Announcements ───────────────────────────────────────────────────
+
+model Announcement {
+  id       String               @id @default(uuid())
+  clubId   String
+  subject  String
+  body     String
+  audience AnnouncementAudience
+  teamId   String?
+  sentById String
+  sentAt   DateTime             @default(now())
+
+  club   Club  @relation(fields: [clubId], references: [id])
+  team   Team? @relation(fields: [teamId], references: [id])
+  sentBy User  @relation(fields: [sentById], references: [id])
+}
+
+// ─── Group 7: Club Documents ──────────────────────────────────────────────────
+
+model ClubDocument {
+  id           String           @id @default(uuid())
+  clubId       String
+  title        String
+  fileUrl      String
+  category     DocumentCategory
+  visibility   DocumentVisibility @default(club)
+  uploadedById String
+  uploadedAt   DateTime           @default(now())
+
+  club       Club @relation(fields: [clubId], references: [id])
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+}
