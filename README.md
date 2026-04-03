@@ -1,6 +1,6 @@
 # Club-OS — Member Portal for UC Cricket Club
 
-Club-OS is the all-in-one management platform for the University of Cincinnati Cricket Club. It replaces scattered spreadsheets, group chats, and payment apps with a single place for everything.
+Club-OS is the all-in-one management platform for the University of Cincinnati Cricket Club. It replaces scattered spreadsheets and payment tracking with a single place for everything.
 
 ---
 
