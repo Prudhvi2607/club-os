@@ -89,7 +89,7 @@ export default async function MembersPage({ searchParams }: Props) {
                 <td className="px-4 py-3">
                   <MemberStatusSelect
                     memberId={m.id}
-                    current={m.status}
+                    current={m.status as 'active' | 'inactive' | 'alumni'}
                     token={token}
                     clubId={CLUB_ID}
                     apiUrl={API_URL}
