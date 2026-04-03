@@ -27,7 +27,7 @@ export default async function DocumentsPage() {
   const isBoard = roles.some((r) => ['board', 'captain', 'vice_captain'].includes(r))
   const myUserId = me?.id ?? ''
 
-  const grouped = docs.reduce<Record<string, typeof docs>>((acc, doc) => {
+  const grouped = docs.reduce<Record<string, typeof docs[number][]>>((acc, doc) => {
     acc[doc.category] = acc[doc.category] ?? []
     acc[doc.category].push(doc)
     return acc
