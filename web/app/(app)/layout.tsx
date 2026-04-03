@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { api } from '@/lib/api'
-import { Sidebar } from '@/components/sidebar'
-import { Topbar } from '@/components/topbar'
+import { AppShell } from '@/components/app-shell'
 import { SignOutButton } from '@/components/sign-out-button'
 import { ToastProvider } from '@/components/toast-provider'
 
@@ -12,7 +11,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session) redirect('/login')
 
   const token = session.access_token
-  const user = session.user
 
   const me = await api.me(token).catch((e) => {
     console.error('[layout] /me error:', e.message)
@@ -38,13 +36,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
-      <div className="flex h-screen">
-        <Sidebar isBoard={isBoard} showPayments={isBoardOnly} />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Topbar fullName={me.fullName} avatarUrl={me.avatarUrl} />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        </div>
-      </div>
+      <AppShell
+        isBoard={isBoard}
+        showPayments={isBoardOnly}
+        fullName={me.fullName}
+        avatarUrl={me.avatarUrl}
+      >
+        {children}
+      </AppShell>
     </ToastProvider>
   )
 }

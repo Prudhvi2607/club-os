@@ -33,9 +33,10 @@ const memberNav: NavItem[] = [
 interface SidebarProps {
   isBoard: boolean
   showPayments?: boolean
+  onNavigate?: () => void
 }
 
-export function Sidebar({ isBoard, showPayments = true }: SidebarProps) {
+export function Sidebar({ isBoard, showPayments = true, onNavigate }: SidebarProps) {
   const pathname = usePathname()
   const nav = isBoard
     ? boardNav.filter((item) => item.href !== '/payments' || showPayments)
@@ -54,6 +55,7 @@ export function Sidebar({ isBoard, showPayments = true }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={`rounded-md px-3 py-2 text-sm transition-colors ${
                 active
                   ? 'bg-zinc-700 text-white'
