@@ -1,27 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const supabase = createClient()
-
-  async function handleMagicLink(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
-    if (error) setError(error.message)
-    else setSent(true)
-    setLoading(false)
-  }
 
   async function handleGoogle() {
     await supabase.auth.signInWithOAuth({
@@ -34,50 +16,17 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm space-y-8 px-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">club-os</h1>
-          <p className="mt-1 text-sm text-zinc-500">The OS for amateur cricket clubs</p>
+          <h1 className="text-2xl font-bold tracking-tight">UC Cricket Club</h1>
+          <p className="mt-1 text-sm text-zinc-500">Member Portal</p>
         </div>
 
-        {sent ? (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center text-sm text-green-700">
-            Check your email — we sent a magic link to <strong>{email}</strong>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <button
-              onClick={handleGoogle}
-              className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 transition-colors"
-            >
-              <GoogleIcon />
-              Sign in with Google
-            </button>
-
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-zinc-200" />
-              <span className="text-xs text-zinc-400">or</span>
-              <div className="h-px flex-1 bg-zinc-200" />
-            </div>
-
-            <form onSubmit={handleMagicLink} className="space-y-3">
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm outline-none focus:border-zinc-400"
-              />
-              {error && <p className="text-xs text-red-600">{error}</p>}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Sending…' : 'Send Magic Link'}
-              </button>
-            </form>
-          </div>
-        )}
+        <button
+          onClick={handleGoogle}
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 transition-colors"
+        >
+          <GoogleIcon />
+          Sign in with Google
+        </button>
       </div>
     </div>
   )
