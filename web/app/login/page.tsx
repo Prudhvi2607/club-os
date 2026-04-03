@@ -16,6 +16,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm space-y-8 px-6">
         <div className="text-center">
+          <p className="text-xs font-semibold tracking-widest uppercase text-zinc-400">club-os</p>
           <h1 className="text-2xl font-bold tracking-tight">UC Cricket Club</h1>
           <p className="mt-1 text-sm text-zinc-500">Member Portal</p>
         </div>
