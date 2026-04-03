@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
 
-const STATUSES = ['active', 'inactive'] as const
+const STATUSES = ['active', 'inactive', 'alumni'] as const
 type Status = (typeof STATUSES)[number]
 
 const STATUS_CLS: Record<string, string> = {
   active: 'bg-green-100 text-green-700',
   inactive: 'bg-zinc-100 text-zinc-500',
+  alumni: 'bg-blue-100 text-blue-700',
 }
 
 interface Props {
