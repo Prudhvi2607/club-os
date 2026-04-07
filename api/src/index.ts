@@ -30,20 +30,23 @@ await app.register(cors, {
 await app.register(authPlugin)
 await app.register(clubAccessPlugin)
 
-// All routes below require a valid Supabase JWT + club membership check
-const routeOptions = { preHandler: [app.authenticate, app.requireClubMember] }
+// All routes below require a valid JWT + club membership check
+app.register(async (secured) => {
+  secured.addHook('preHandler', app.authenticate)
+  secured.addHook('preHandler', app.requireClubMember)
 
-app.register(clubsRoutes, routeOptions)
-app.register(membersRoutes, routeOptions)
-app.register(seasonsRoutes, routeOptions)
-app.register(paymentsRoutes, routeOptions)
-app.register(squadsRoutes, routeOptions)
-app.register(announcementsRoutes, routeOptions)
-app.register(meRoutes, routeOptions)
-app.register(customRolesRoutes, routeOptions)
-app.register(tournamentsRoutes, routeOptions)
-app.register(availabilityRoutes, routeOptions)
-app.register(documentsRoutes, routeOptions)
+  secured.register(clubsRoutes)
+  secured.register(membersRoutes)
+  secured.register(seasonsRoutes)
+  secured.register(paymentsRoutes)
+  secured.register(squadsRoutes)
+  secured.register(announcementsRoutes)
+  secured.register(meRoutes)
+  secured.register(customRolesRoutes)
+  secured.register(tournamentsRoutes)
+  secured.register(availabilityRoutes)
+  secured.register(documentsRoutes)
+})
 
 app.listen({ port: Number(process.env.PORT ?? 3001), host: '0.0.0.0' }, (err) => {
   if (err) {
