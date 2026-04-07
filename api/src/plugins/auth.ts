@@ -1,22 +1,6 @@
+import crypto from 'node:crypto'
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import fp from 'fastify-plugin'
-import fastifyJwt from '@fastify/jwt'
-
-declare module '@fastify/jwt' {
-  interface FastifyJWT {
-    payload: {
-      sub: string        // Supabase user ID
-      email?: string
-      role?: string
-      aud?: string
-    }
-    user: {
-      id: string
-      email?: string
-      role?: string
-    }
-  }
-}
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -24,20 +8,31 @@ declare module 'fastify' {
   }
 }
 
+function verifyJwt(token: string, secret: string): { sub: string; email?: string } | null {
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  const [header, payload, signature] = parts
+  const expected = crypto.createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64url')
+  if (expected !== signature) return null
+  try {
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString())
+    if (decoded.exp && decoded.exp < Date.now() / 1000) return null
+    return decoded
+  } catch {
+    return null
+  }
+}
+
 export default fp(async function authPlugin(app: FastifyInstance) {
   const secret = process.env['SUPABASE_JWT_SECRET']
   if (!secret) throw new Error('SUPABASE_JWT_SECRET is not set')
 
-  await app.register(fastifyJwt, { secret, verify: { allowedAud: 'authenticated' } })
-
   app.decorate('authenticate', async (req: FastifyRequest, reply: FastifyReply) => {
-    try {
-      await req.jwtVerify()
-      // Remap sub → id for convenience
-      const payload = req.user as unknown as { sub: string; email?: string; role?: string }
-      ;(req as any).user = { id: payload.sub, email: payload.email, role: payload.role }
-    } catch {
-      reply.code(401).send({ error: 'Unauthorized' })
-    }
+    const auth = req.headers.authorization
+    if (!auth?.startsWith('Bearer ')) return reply.code(401).send({ error: 'Unauthorized' })
+    const token = auth.slice(7)
+    const payload = verifyJwt(token, secret)
+    if (!payload) return reply.code(401).send({ error: 'Unauthorized' })
+    ;(req as any).user = { id: payload.sub, email: payload.email }
   })
 })

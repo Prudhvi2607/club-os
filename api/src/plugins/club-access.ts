@@ -13,7 +13,8 @@ export default fp(async function clubAccessPlugin(app: FastifyInstance) {
     const { clubId } = req.params as { clubId?: string }
     if (!clubId) return // route doesn't have a clubId param — skip
 
-    const userId = (req.user as { id: string }).id
+    const userId = (req as any).user?.id as string | undefined
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' })
 
     const membership = await prisma.clubMember.findFirst({
       where: {
