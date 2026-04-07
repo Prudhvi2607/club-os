@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import authPlugin from './plugins/auth.js'
+import clubAccessPlugin from './plugins/club-access.js'
 import clubsRoutes from './routes/clubs.js'
 import membersRoutes from './routes/members.js'
 import seasonsRoutes from './routes/seasons.js'
@@ -27,9 +28,10 @@ await app.register(cors, {
 })
 
 await app.register(authPlugin)
+await app.register(clubAccessPlugin)
 
-// All routes below require a valid Supabase JWT
-const routeOptions = { preHandler: [app.authenticate] }
+// All routes below require a valid Supabase JWT + club membership check
+const routeOptions = { preHandler: [app.authenticate, app.requireClubMember] }
 
 app.register(clubsRoutes, routeOptions)
 app.register(membersRoutes, routeOptions)
