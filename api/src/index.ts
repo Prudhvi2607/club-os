@@ -30,17 +30,23 @@ await app.register(cors, {
 await app.register(authPlugin)
 await app.register(clubAccessPlugin)
 
-app.register(clubsRoutes)
-app.register(membersRoutes)
-app.register(seasonsRoutes)
-app.register(paymentsRoutes)
-app.register(squadsRoutes)
-app.register(announcementsRoutes)
-app.register(meRoutes)
-app.register(customRolesRoutes)
-app.register(tournamentsRoutes)
-app.register(availabilityRoutes)
-app.register(documentsRoutes)
+// All routes below require a valid JWT + club membership check
+app.register(async (secured) => {
+  secured.addHook('preHandler', app.authenticate)
+  secured.addHook('preHandler', app.requireClubMember)
+
+  secured.register(clubsRoutes)
+  secured.register(membersRoutes)
+  secured.register(seasonsRoutes)
+  secured.register(paymentsRoutes)
+  secured.register(squadsRoutes)
+  secured.register(announcementsRoutes)
+  secured.register(meRoutes)
+  secured.register(customRolesRoutes)
+  secured.register(tournamentsRoutes)
+  secured.register(availabilityRoutes)
+  secured.register(documentsRoutes)
+})
 
 app.listen({ port: Number(process.env.PORT ?? 3001), host: '0.0.0.0' }, (err) => {
   if (err) {

@@ -28,7 +28,7 @@ export default fp(async function authPlugin(app: FastifyInstance) {
   const secret = process.env['SUPABASE_JWT_SECRET']
   if (!secret) throw new Error('SUPABASE_JWT_SECRET is not set')
 
-  await app.register(fastifyJwt, { secret })
+  await app.register(fastifyJwt, { secret, verify: { allowedAud: 'authenticated' } })
 
   app.decorate('authenticate', async (req: FastifyRequest, reply: FastifyReply) => {
     try {
