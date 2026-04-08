@@ -14,6 +14,14 @@
 
 - [ ] **Payment confirmation flow** — Members submit payment proof → board confirms → fee marked as paid. End-to-end flow with notifications.
 
+## Future Milestone — Reduce Vendor Lock-in
+
+Currently dependent on Supabase for auth and database hosting. This limits control over branding (Google shows `phxusgzpoqdgodeshinn.supabase.co` during sign-in) and pricing.
+
+- [ ] **Replace Supabase Auth with Auth.js** — Self-hosted, runs inside Next.js, Google OAuth shows your own domain (`uccricketclub.org`). Free.
+- [ ] **Move Postgres to a standalone host** — Neon, GCP Cloud SQL, or Railway. Removes Supabase dependency entirely.
+- [ ] **Self-host everything on GCP** — API on Cloud Run (already done), DB on Cloud SQL, auth via Auth.js. Full control, no monthly SaaS fees beyond compute.
+
 ## Future Milestone — Multi-Club / SaaS
 
 Goal: Make Club-OS work for any cricket club, not just UC.
