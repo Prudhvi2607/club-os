@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { CreateAnnouncementModal } from '@/components/create-announcement-modal'
 import { DeleteAnnouncementButton } from '@/components/delete-announcement-button'
@@ -13,9 +13,9 @@ const AUDIENCE_BADGE: Record<string, string> = {
 }
 
 export default async function AnnouncementsPage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [announcements, me, teams] = await Promise.all([
     api.announcements.list(token, { limit: 50 }).catch(() => []),

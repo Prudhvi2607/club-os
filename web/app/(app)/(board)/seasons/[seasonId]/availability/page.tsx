@@ -1,15 +1,15 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { AvailabilityBoardView } from '@/components/availability-board-view'
 
 export default async function SeasonAvailabilityPage({ params }: { params: Promise<{ seasonId: string }> }) {
   const { seasonId } = await params
 
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [season, seasonAvail] = await Promise.all([
     api.seasons.get(token, seasonId).catch(() => null),

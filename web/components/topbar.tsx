@@ -1,8 +1,7 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 
 interface TopbarProps {
   fullName: string
@@ -11,13 +10,6 @@ interface TopbarProps {
 }
 
 export function Topbar({ fullName, avatarUrl, onMenuClick }: TopbarProps) {
-  const router = useRouter()
-  const supabase = createClient()
-
-  async function signOut() {
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
 
   const initials = fullName
     .split(' ')
@@ -38,22 +30,22 @@ export function Topbar({ fullName, avatarUrl, onMenuClick }: TopbarProps) {
         </svg>
       </button>
       <div className="flex items-center gap-3 ml-auto">
-      <Link href="/profile" className="flex items-center gap-2 hover:opacity-75 transition-opacity">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={fullName} className="h-7 w-7 rounded-full object-cover" />
-        ) : (
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-xs font-medium text-zinc-600">
-            {initials}
-          </div>
-        )}
-        <span className="text-sm font-medium">{fullName}</span>
-      </Link>
-      <button
-        onClick={signOut}
-        className="text-sm text-zinc-400 hover:text-zinc-700 transition-colors"
-      >
-        Logout
-      </button>
+        <Link href="/profile" className="flex items-center gap-2 hover:opacity-75 transition-opacity">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={fullName} className="h-7 w-7 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-xs font-medium text-zinc-600">
+              {initials}
+            </div>
+          )}
+          <span className="text-sm font-medium">{fullName}</span>
+        </Link>
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="text-sm text-zinc-400 hover:text-zinc-700 transition-colors"
+        >
+          Logout
+        </button>
       </div>
     </header>
   )

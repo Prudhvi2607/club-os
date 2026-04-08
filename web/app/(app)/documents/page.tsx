@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { UploadDocumentModal } from '@/components/upload-document-modal'
 import { DeleteDocumentButton } from '@/components/delete-document-button'
@@ -14,9 +14,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export default async function DocumentsPage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [me, docs] = await Promise.all([
     api.me(token).catch(() => null),

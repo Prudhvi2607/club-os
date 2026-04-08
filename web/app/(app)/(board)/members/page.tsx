@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { CreateMemberModal } from '@/components/create-member-modal'
 import { MemberStatusSelect } from '@/components/member-status-select'
@@ -20,9 +20,9 @@ interface Props {
 export default async function MembersPage({ searchParams }: Props) {
   const { status, role, playingRole, sort = 'name_asc' } = await searchParams
 
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [members, customRoles] = await Promise.all([
     api.members.list(token).catch(() => []),

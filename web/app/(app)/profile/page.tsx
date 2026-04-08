@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { EditProfileForm } from '@/components/edit-profile-form'
 
@@ -13,9 +13,9 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [me, takenJerseyNumbers] = await Promise.all([
     api.me(token).catch(() => null),

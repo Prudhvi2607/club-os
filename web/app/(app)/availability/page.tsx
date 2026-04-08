@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { TournamentAvailabilityGrid } from '@/components/tournament-availability-grid'
 
@@ -6,9 +6,9 @@ const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 const API_URL = process.env.NEXT_PUBLIC_API_URL!
 
 export default async function AvailabilityPage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [me, seasons] = await Promise.all([
     api.me(token).catch(() => null),

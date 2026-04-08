@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { RegisterSeasonButton } from '@/components/register-season-button'
 
@@ -6,9 +6,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL!
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [me, seasons, announcements] = await Promise.all([
     api.me(token).catch(() => null),

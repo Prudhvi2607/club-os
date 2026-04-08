@@ -1,17 +1,6 @@
-'use client'
-
-import { createClient } from '@/lib/supabase/client'
+import { signIn } from '@/auth'
 
 export default function LoginPage() {
-  const supabase = createClient()
-
-  async function handleGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    })
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm space-y-8 px-6">
@@ -20,13 +9,20 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold tracking-tight">UC Cricket Club</h1>
         </div>
 
-        <button
-          onClick={handleGoogle}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 transition-colors"
+        <form
+          action={async () => {
+            'use server'
+            await signIn('google', { redirectTo: '/dashboard' })
+          }}
         >
-          <GoogleIcon />
-          Sign in with Google
-        </button>
+          <button
+            type="submit"
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 transition-colors"
+          >
+            <GoogleIcon />
+            Sign in with Google
+          </button>
+        </form>
       </div>
     </div>
   )

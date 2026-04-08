@@ -1,16 +1,15 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { AppShell } from '@/components/app-shell'
 import { SignOutButton } from '@/components/sign-out-button'
 import { ToastProvider } from '@/components/toast-provider'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const session = await auth()
   if (!session) redirect('/login')
 
-  const token = session.access_token
+  const token = (session as any).accessToken ?? ''
 
   const me = await api.me(token).catch((e) => {
     console.error('[layout] /me error:', e.message)

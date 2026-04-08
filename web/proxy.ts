@@ -1,44 +1,27 @@
-import { createServerClient } from '@supabase/ssr'
+import { auth } from '@/auth'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request })
+  const { pathname } = request.nextUrl
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
-          })
-        },
-      },
+  // Let Auth.js handle its own routes — never intercept these
+  if (pathname.startsWith('/api/auth')) {
+    return NextResponse.next({ request })
+  }
+
+  const isAuthPage = pathname.startsWith('/login')
+
+  // Only call auth() when we actually need to check session
+  if (!isAuthPage) {
+    const session = await auth()
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url))
     }
-  )
-
-  // Refresh session so cookies stay fresh
-  const { data: { session } } = await supabase.auth.getSession()
-
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login')
-  const isProtected = !isAuthPage && request.nextUrl.pathname !== '/'
-
-  if (!session && isProtected) {
-    return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (session && isAuthPage) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  return response
+  return NextResponse.next({ request })
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|auth/callback).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }

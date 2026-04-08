@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { SubmitPaymentRequestButton } from '@/components/submit-payment-request-button'
 
@@ -12,9 +12,9 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 export default async function MyFeesPage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ''
+  
+  const session = await auth()
+  const token = (session as any)?.accessToken ?? ''
 
   const [me, seasons] = await Promise.all([
     api.me(token).catch(() => null),
