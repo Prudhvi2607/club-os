@@ -22,15 +22,13 @@ Currently dependent on Supabase for auth and database hosting. This limits contr
 - [ ] **Move Postgres to a standalone host** — Neon, GCP Cloud SQL, or Railway. Removes Supabase dependency entirely.
 - [ ] **Self-host everything on GCP** — API on Cloud Run (already done), DB on Cloud SQL, auth via Auth.js. Full control, no monthly SaaS fees beyond compute.
 
-## Future Milestone — Multi-Club / SaaS
+## Future Milestone — Open Source (Self-Hosted)
 
-Goal: Make Club-OS work for any cricket club, not just UC.
+Goal: Any club can run their own Club-OS instance for free. No central hosting, no SaaS fees — you maintain the code, clubs own their data.
 
-The API and database are already multi-tenant. What needs to change:
-
-- [ ] **Subdomain routing** — Each club gets `[slug].club-os.app`. Next.js middleware reads subdomain, looks up club by slug, injects the correct club ID.
-- [ ] **Dynamic club branding** — Club name and logo pulled from DB, not hardcoded.
-- [ ] **Wildcard CORS** — API allows `*.club-os.app` instead of one hardcoded domain.
-- [ ] **Club onboarding flow** — Signup page at `club-os.app/signup` to create a new club and invite the admin.
-- [ ] **Shared or per-club email** — Either a shared sender (`noreply@club-os.app`) or per-club SMTP config.
-- [ ] **Buy `club-os.app` domain** — Or equivalent for the SaaS deployment.
+- [ ] **One-command setup** — `docker-compose up` spins up the full stack (API + web + Postgres). No cloud account needed.
+- [ ] **Config via env file** — Club name, logo, Google OAuth credentials, email — all set in a single `.env` file.
+- [ ] **Replace Supabase Auth with Auth.js** — Removes the only remaining Supabase dependency. Google OAuth works out of the box, shows the club's own domain.
+- [ ] **Postgres included in Docker Compose** — No external DB service needed by default.
+- [ ] **Setup guide** — Simple README a non-developer admin can follow to self-host on a cheap VPS ($5/mo on DigitalOcean or free on a home server).
+- [ ] **GitHub public repo** — Publish under an open source license (MIT or Apache 2.0).
