@@ -39,6 +39,28 @@ Currently dependent on Supabase for auth and database hosting. This limits contr
 - [ ] **Move Postgres to a standalone host** — Neon, GCP Cloud SQL, or Railway. Removes Supabase dependency entirely.
 - [ ] **Self-host everything on GCP** — API on Cloud Run (already done), DB on Cloud SQL, auth via Auth.js. Full control, no monthly SaaS fees beyond compute.
 
+## Future Milestone — Open Source Readiness
+
+Before making the repo public, these must be done:
+
+**Legal**
+- [ ] Pick a license (MIT recommended) and add `LICENSE` file
+
+**Code cleanup**
+- [ ] Move all hardcoded UC Cricket Club config (club name, club ID, email) to env vars
+- [ ] Audit git history for any committed secrets (`git log -p | grep -i secret`)
+- [ ] Remove UC Cricket Club branding from code — only in config/env
+
+**Documentation**
+- [ ] Rewrite `README.md` for a generic audience — what Club-OS is, how to self-host, how to configure
+- [ ] Add `CONTRIBUTING.md` — how others can submit PRs and report issues
+- [ ] Add `.env.example` — all required env vars with descriptions, no real values
+
+**Repository**
+- [ ] Ensure `.gitignore` covers all `.env*` files
+- [ ] Make GitHub repo public
+- [ ] Tag first stable release as `v0.1.0`
+
 ## Future Milestone — Open Source (Self-Hosted)
 
 Goal: Any club can run their own Club-OS instance for free. No central hosting, no SaaS fees — you maintain the code, clubs own their data.
