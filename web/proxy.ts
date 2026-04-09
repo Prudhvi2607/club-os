@@ -1,20 +1,24 @@
-import { auth } from '@/auth'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Let Auth.js handle its own routes — never intercept these
+  // Let Auth.js handle its own routes
   if (pathname.startsWith('/api/auth')) {
     return NextResponse.next({ request })
   }
 
   const isAuthPage = pathname.startsWith('/login')
 
-  // Only call auth() when we actually need to check session
   if (!isAuthPage) {
-    const session = await auth()
-    if (!session) {
+    // Check for Auth.js session cookie
+    const hasSession =
+      request.cookies.has('authjs.session-token') ||
+      request.cookies.has('__Secure-authjs.session-token') ||
+      request.cookies.has('next-auth.session-token') ||
+      request.cookies.has('__Secure-next-auth.session-token')
+
+    if (!hasSession) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
