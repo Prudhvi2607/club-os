@@ -12,8 +12,7 @@ function verifyJwt(token: string, secret: string): { sub: string; email?: string
   const parts = token.split('.')
   if (parts.length !== 3) return null
   const [header, payload, signature] = parts
-  const key = Buffer.from(secret)
-  const expected = crypto.createHmac('sha256', key).update(`${header}.${payload}`).digest('base64url')
+  const expected = crypto.createHmac('sha256', Buffer.from(secret, 'utf8')).update(`${header}.${payload}`).digest('base64url')
   if (expected !== signature) return null
   try {
     const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString())
