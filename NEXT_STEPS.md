@@ -21,6 +21,16 @@ Vercel is a managed platform with limited visibility into logs and env vars. Alt
 - [ ] **Move web (Next.js) to Cloud Run** — Already have the Cloud Build/Cloud Run pipeline for the API. Add a Dockerfile for web and deploy both on GCP. One platform, full control.
 - [ ] **Or use Coolify** — Open source self-hosted Vercel alternative. Runs on any VPS, auto-deploys from GitHub, has a UI. Good middle ground.
 
+## Future Milestone — Move Database to GCP Cloud SQL
+
+Currently Postgres is hosted on Supabase. Moving to Cloud SQL keeps everything on one platform.
+
+- [ ] **Create Cloud SQL Postgres instance** on GCP
+- [ ] **Migrate data** — `pg_dump` from Supabase, restore to Cloud SQL
+- [ ] **Update `DATABASE_URL`** in Cloud Run env vars
+- [ ] **Run Prisma migrations** against new DB
+- [ ] **Decommission Supabase** — removes last dependency, saves ~$0-25/mo depending on plan
+
 ## Future Milestone — Reduce Vendor Lock-in
 
 Currently dependent on Supabase for auth and database hosting. This limits control over branding (Google shows `phxusgzpoqdgodeshinn.supabase.co` during sign-in) and pricing.
