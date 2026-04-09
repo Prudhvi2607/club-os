@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Let Auth.js handle its own routes
-  if (pathname.startsWith('/api/auth')) {
+  // Let Auth.js and debug routes through
+  if (pathname.startsWith('/api/auth') || pathname.startsWith('/api/debug')) {
     return NextResponse.next({ request })
   }
 
