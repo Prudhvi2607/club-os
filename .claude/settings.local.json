@@ -12,7 +12,10 @@
       "Bash(pkill -f \"src/index.ts\")",
       "Bash(kill %1)",
       "Bash(node -e \":*)",
-      "Bash(ls /Users/prudhvi/my-app/web/app/\\\\\\(app\\\\\\)/\\\\\\(board\\\\\\)/)"
+      "Bash(ls /Users/prudhvi/my-app/web/app/\\\\\\(app\\\\\\)/\\\\\\(board\\\\\\)/)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

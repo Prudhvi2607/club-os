@@ -46,7 +46,7 @@ export function Sidebar({ isBoard, showPayments = true, onNavigate }: SidebarPro
     <aside className="flex h-full w-56 flex-col bg-zinc-900 px-3 py-4">
       <div className="px-2 py-2 mb-6">
         <span className="text-sm font-semibold text-white">club-os</span>
-        <p className="text-xs text-zinc-500 mt-0.5">UC Cricket Club</p>
+        <p className="text-xs text-zinc-500 mt-0.5">{process.env.NEXT_PUBLIC_CLUB_NAME ?? 'My Club'}</p>
       </div>
       <nav className="flex flex-col gap-0.5">
         {nav.map((item) => {

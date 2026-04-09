@@ -1,38 +1,92 @@
-# Club-OS — Member Portal for UC Cricket Club
+# Club-OS
 
-Club-OS is the all-in-one management platform for the University of Cincinnati Cricket Club. It replaces scattered spreadsheets and payment tracking with a single place for everything.
+The all-in-one management platform for amateur cricket clubs. Replaces WhatsApp groups, spreadsheets, and scattered payment apps with a single member portal.
 
----
+## Features
 
-## What can members do?
+- **Members** — Roster management, roles, jersey numbers, playing profiles
+- **Seasons** — Create seasons, register members, manage teams
+- **Payments** — Assign fees, record payments, member payment requests
+- **Announcements** — Notify the whole club, a team, or just the board — with email delivery
+- **Availability** — Track member availability for tournaments
+- **Documents** — Share bylaws, code of conduct, and club files
+- **Profile** — Members manage their own info, emergency contacts, CricClubs link
 
-- **View announcements** — Stay up to date with club and team news
-- **Check your fees** — See what you owe and submit payment requests
-- **Mark availability** — Let the board know if you're available for tournaments
-- **Access documents** — View club bylaws, code of conduct, and more
-- **Update your profile** — Add your jersey number, playing role, emergency contact, and CricClubs link
+## Tech Stack
 
-## What can board members do?
+| Layer | Technology |
+|-------|-----------|
+| Web | Next.js (App Router) |
+| API | Fastify + Prisma |
+| Database | PostgreSQL |
+| Auth | Auth.js (Google OAuth) |
+| Email | Nodemailer (Gmail SMTP) |
 
-Everything members can do, plus:
+## Self-Hosting
 
-- **Manage members** — Add members, assign roles, update status
-- **Run seasons** — Create seasons, register members, manage teams
-- **Track payments** — Assign fees, record payments, confirm payment requests
-- **Send announcements** — Notify the whole club, a specific team, or just the board
-- **Upload documents** — Share club files with members or board only
-- **Manage tournaments** — Create tournaments and track team availability
+### Prerequisites
+- Node.js 20+
+- PostgreSQL database
+- Google OAuth credentials ([setup guide](https://developers.google.com/identity/protocols/oauth2))
+- Gmail account with App Password enabled
 
----
+### 1. Clone the repo
 
-## Access
+```bash
+git clone https://github.com/Prudhvi2607/club-os.git
+cd club-os
+```
 
-The portal is available at **[app.uccricketclub.org](https://app.uccricketclub.org)**
+### 2. Configure the API
 
-Sign in with your Google account. If you don't have access, contact the board at [uccricketclub@gmail.com](mailto:uccricketclub@gmail.com).
+```bash
+cd api
+cp .env.example .env
+# Fill in your values
+npm install
+npx prisma migrate deploy
+npx prisma db seed   # creates your club + admin user
+npm run dev
+```
 
----
+### 3. Configure the web app
 
-## Club Website
+```bash
+cd web
+cp .env.example .env.local
+# Fill in your values
+npm install
+npm run dev
+```
 
-The public club website is at **[uccricketclub.org](https://uccricketclub.org)**
+Open [http://localhost:3000](http://localhost:3000)
+
+## Environment Variables
+
+### API (`api/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `DIRECT_URL` | Direct PostgreSQL URL (for migrations) |
+| `AUTH_SECRET` | Shared secret with web app for JWT verification |
+| `EMAIL_USER` | Gmail address for sending announcements |
+| `EMAIL_PASS` | Gmail App Password |
+| `CLUB_NAME` | Your club's name (used in emails) |
+| `CORS_ORIGIN` | Web app URL (e.g. `http://localhost:3000`) |
+
+### Web (`web/.env.local`)
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_CLUB_NAME` | Your club's name (shown in UI) |
+| `NEXT_PUBLIC_CLUB_ID` | Club UUID from database |
+| `NEXT_PUBLIC_API_URL` | API URL (e.g. `http://localhost:3001`) |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret |
+| `AUTH_SECRET` | Must match API `AUTH_SECRET` |
+| `AUTH_URL` | Web app URL (e.g. `http://localhost:3000`) |
+
+## License
+
+MIT — see [LICENSE](LICENSE)
