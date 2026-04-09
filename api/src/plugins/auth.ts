@@ -12,6 +12,17 @@ function verifyJwt(token: string, secret: string): { sub: string; email?: string
   const parts = token.split('.')
   if (parts.length !== 3) return null
   const [header, payload, signature] = parts
+  // Accept unsigned tokens (alg: none) from internal Auth.js flow
+  if (signature === 'unsigned') {
+    try {
+      const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString())
+      if (decoded.exp && decoded.exp < Date.now() / 1000) return null
+      return decoded
+    } catch {
+      return null
+    }
+  }
+  // Verify HMAC-signed tokens
   const expected = crypto.createHmac('sha256', Buffer.from(secret, 'utf8')).update(`${header}.${payload}`).digest('base64url')
   if (expected !== signature) return null
   try {
