@@ -14,6 +14,13 @@
 
 - [ ] **Payment confirmation flow** — Members submit payment proof → board confirms → fee marked as paid. End-to-end flow with notifications.
 
+## Future Milestone — Replace Vercel with Self-Hosted
+
+Vercel is a managed platform with limited visibility into logs and env vars. Alternatives:
+
+- [ ] **Move web (Next.js) to Cloud Run** — Already have the Cloud Build/Cloud Run pipeline for the API. Add a Dockerfile for web and deploy both on GCP. One platform, full control.
+- [ ] **Or use Coolify** — Open source self-hosted Vercel alternative. Runs on any VPS, auto-deploys from GitHub, has a UI. Good middle ground.
+
 ## Future Milestone — Reduce Vendor Lock-in
 
 Currently dependent on Supabase for auth and database hosting. This limits control over branding (Google shows `phxusgzpoqdgodeshinn.supabase.co` during sign-in) and pricing.
