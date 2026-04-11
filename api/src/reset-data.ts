@@ -7,8 +7,13 @@ const pool = new Pool({ connectionString: process.env['DIRECT_URL'] })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
-const CLUB_ID = '081dfc5b-9afa-463e-b094-4671005a1538'
-const MY_EMAIL = 'prudhvi2607@gmail.com' // your email — this account will be kept
+const CLUB_ID = process.env['CLUB_ID'] || ''
+const MY_EMAIL = process.env['MY_EMAIL'] || ''
+
+if (!CLUB_ID || !MY_EMAIL) {
+  console.error('Set CLUB_ID and MY_EMAIL env vars before running this script')
+  process.exit(1)
+}
 
 async function main() {
   console.log('Starting data reset...')

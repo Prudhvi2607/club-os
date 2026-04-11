@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import prisma from '../lib/prisma.js'
-import { ClubRole, MemberStatus } from '@prisma/client'
+import { ClubRole, MemberStatus, Prisma } from '@prisma/client'
 
 export default async function membersRoutes(app: FastifyInstance) {
   // GET /clubs/:clubId/members
@@ -88,24 +88,31 @@ export default async function membersRoutes(app: FastifyInstance) {
     const club = await prisma.club.findUnique({ where: { id: clubId } })
     if (!club) return reply.code(404).send({ error: 'Club not found' })
 
-    const member = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({ data: userFields as any })
+    try {
+      const member = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({ data: userFields as any })
 
-      const clubMember = await tx.clubMember.create({
-        data: {
-          userId: user.id,
-          clubId,
-          roles: {
-            create: roles.map((role) => ({ role })),
+        const clubMember = await tx.clubMember.create({
+          data: {
+            userId: user.id,
+            clubId,
+            roles: {
+              create: roles.map((role) => ({ role })),
+            },
           },
-        },
-        include: { user: true, roles: true },
+          include: { user: true, roles: true },
+        })
+
+        return clubMember
       })
 
-      return clubMember
-    })
-
-    return reply.code(201).send(member)
+      return reply.code(201).send(member)
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        return reply.code(409).send({ error: 'A member with this email already exists' })
+      }
+      throw e
+    }
   })
 
   // PATCH /clubs/:clubId/members/:memberId

@@ -183,6 +183,45 @@ export default async function paymentsRoutes(app: FastifyInstance) {
     return reply.code(201).send(result)
   })
 
+  // DELETE /clubs/:clubId/members/:memberId/fees/:feeId/payments/:paymentId
+  // Undo a recorded payment
+  app.delete<{
+    Params: { clubId: string; memberId: string; feeId: string; paymentId: string }
+  }>('/clubs/:clubId/members/:memberId/fees/:feeId/payments/:paymentId', async (req, reply) => {
+    const { clubId, memberId, feeId, paymentId } = req.params
+
+    const member = await prisma.clubMember.findFirst({ where: { id: memberId, clubId } })
+    if (!member) return reply.code(404).send({ error: 'Member not found' })
+
+    const payment = await prisma.payment.findFirst({ where: { id: paymentId, memberFeeId: feeId } })
+    if (!payment) return reply.code(404).send({ error: 'Payment not found' })
+
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.delete({ where: { id: paymentId } })
+
+      const remaining = await tx.payment.aggregate({
+        where: { memberFeeId: feeId },
+        _sum: { amount: true },
+      })
+
+      const memberFee = await tx.memberFee.findUnique({ where: { id: feeId } })
+      if (!memberFee) throw new Error('Fee not found')
+
+      const newAmountPaid = Number(remaining._sum.amount ?? 0)
+      const newStatus: FeeStatus =
+        newAmountPaid >= Number(memberFee.amountDue) ? 'paid'
+        : newAmountPaid > 0 ? 'partial'
+        : 'pending'
+
+      await tx.memberFee.update({
+        where: { id: feeId },
+        data: { amountPaid: newAmountPaid, status: newStatus },
+      })
+    })
+
+    return reply.code(204).send()
+  })
+
   // ── Payment Requests ───────────────────────────────────────────────────────
 
   // POST /clubs/:clubId/members/:memberId/fees/:feeId/payment-requests

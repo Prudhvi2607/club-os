@@ -7,6 +7,7 @@ import { CreateFeeTypeModal } from '@/components/create-fee-type-modal'
 import { AssignFeeButton } from '@/components/assign-fee-button'
 import { RecordPaymentModal } from '@/components/record-payment-modal'
 import { PaymentRequestsPanel } from '@/components/payment-requests-panel'
+import { UndoPaymentButton } from '@/components/undo-payment-button'
 
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 const API_URL = process.env.NEXT_PUBLIC_API_URL!
@@ -145,7 +146,7 @@ export default async function PaymentsPage({ searchParams }: Props) {
                 </td>
               </tr>
             ) : (
-              summary.fees.map((fee) => (
+              summary.fees.flatMap((fee) => [
                 <tr key={fee.id} className="hover:bg-zinc-50 transition-colors">
                   <td className="px-4 py-3 font-medium">{fee.clubMember.user.fullName}</td>
                   <td className="px-4 py-3 text-zinc-500">{fee.feeType.name}</td>
@@ -172,8 +173,30 @@ export default async function PaymentsPage({ searchParams }: Props) {
                       />
                     )}
                   </td>
-                </tr>
-              ))
+                </tr>,
+                ...fee.payments.map((payment: any) => (
+                  <tr key={payment.id} className="bg-zinc-50/50">
+                    <td colSpan={2} className="px-4 py-1.5 pl-8 text-xs text-zinc-400">
+                      {new Date(payment.paidAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {payment.notes && <span className="ml-1">· {payment.notes}</span>}
+                    </td>
+                    <td />
+                    <td className="px-4 py-1.5 text-right text-xs text-zinc-500">${Number(payment.amount).toFixed(2)}</td>
+                    <td className="px-4 py-1.5 text-xs text-zinc-400 capitalize">{payment.method}</td>
+                    <td className="px-4 py-1.5 text-right">
+                      <UndoPaymentButton
+                        paymentId={payment.id}
+                        feeId={fee.id}
+                        memberId={fee.clubMember.id}
+                        amount={Number(payment.amount)}
+                        token={token}
+                        clubId={CLUB_ID}
+                        apiUrl={API_URL}
+                      />
+                    </td>
+                  </tr>
+                )),
+              ])
             )}
           </tbody>
         </table>
