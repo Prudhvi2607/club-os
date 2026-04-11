@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { CreateMemberModal } from '@/components/create-member-modal'
@@ -71,7 +72,9 @@ export default async function MembersPage({ searchParams }: Props) {
             )}
             {filtered.map((m) => (
               <tr key={m.id} className="hover:bg-zinc-50 transition-colors">
-                <td className="px-4 py-3 font-medium">{m.user.fullName}</td>
+                <td className="px-4 py-3 font-medium">
+                  <Link href={`/members/${m.id}`} className="hover:underline">{m.user.fullName}</Link>
+                </td>
                 <td className="px-4 py-3">
                   <MemberRolesEditor
                     memberId={m.id}
