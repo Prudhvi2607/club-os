@@ -1,6 +1,6 @@
 # Club-OS
 
-The all-in-one management platform for amateur cricket clubs. Replaces WhatsApp groups, spreadsheets, and scattered payment apps with a single member portal.
+The all-in-one management platform for cricket clubs. Replaces WhatsApp groups, spreadsheets, and scattered payment apps with a single member portal.
 
 ## Features
 
