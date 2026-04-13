@@ -235,6 +235,8 @@ export const api = {
       ),
     get: (token: string, memberId: string) =>
       apiFetch<Member>(`/clubs/${CLUB_ID}/members/${memberId}`, token),
+    teams: (token: string, memberId: string) =>
+      apiFetch<any[]>(`/clubs/${CLUB_ID}/members/${memberId}/teams`, token),
     create: (token: string, body: Record<string, unknown>) =>
       apiFetch<Member>(`/clubs/${CLUB_ID}/members`, token, {
         method: 'POST',

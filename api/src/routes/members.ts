@@ -221,6 +221,41 @@ export default async function membersRoutes(app: FastifyInstance) {
     return reply.code(204).send()
   })
 
+  // GET /clubs/:clubId/members/:memberId/teams
+  // Member's team assignments across all seasons, with tournaments + availability
+  app.get<{ Params: { clubId: string; memberId: string } }>(
+    '/clubs/:clubId/members/:memberId/teams',
+    async (req, reply) => {
+      const { clubId, memberId } = req.params
+
+      const member = await prisma.clubMember.findFirst({ where: { id: memberId, clubId } })
+      if (!member) return reply.code(404).send({ error: 'Member not found' })
+
+      const assignments = await prisma.teamAssignment.findMany({
+        where: { clubMemberId: memberId, removedAt: null },
+        include: { team: true, season: true },
+        orderBy: { assignedAt: 'desc' },
+      })
+
+      const result = await Promise.all(assignments.map(async (a) => {
+        const tournaments = await prisma.tournament.findMany({
+          where: { seasonId: a.seasonId, teams: { some: { teamId: a.teamId } } },
+          include: { availability: { where: { clubMemberId: memberId } } },
+          orderBy: { startDate: 'asc' },
+        })
+        return {
+          teamName: a.team.name,
+          seasonName: a.season.name,
+          seasonStatus: a.season.status,
+          assignedAt: a.assignedAt,
+          tournaments,
+        }
+      }))
+
+      return result
+    }
+  )
+
   // DELETE /clubs/:clubId/members/:memberId/roles/:role
   app.delete<{
     Params: { clubId: string; memberId: string; role: ClubRole }

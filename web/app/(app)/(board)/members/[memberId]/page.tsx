@@ -3,9 +3,6 @@ import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 
-const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
-const API_URL = process.env.NEXT_PUBLIC_API_URL!
-
 const STATUS_BADGE: Record<string, string> = {
   paid: 'bg-green-100 text-green-700',
   partial: 'bg-yellow-100 text-yellow-700',
@@ -29,7 +26,10 @@ export default async function MemberProfilePage({ params }: Props) {
   const session = await auth()
   const token = (session as any)?.accessToken ?? ''
 
-  const member = await api.members.get(token, memberId).catch(() => null) as any
+  const [member, teamAssignments] = await Promise.all([
+    api.members.get(token, memberId).catch(() => null) as any,
+    api.members.teams(token, memberId).catch(() => []),
+  ])
   if (!member) notFound()
 
   const u = member.user
@@ -51,13 +51,17 @@ export default async function MemberProfilePage({ params }: Props) {
           <p className="text-sm text-zinc-400 mt-0.5 capitalize">
             {member.status}
             {u.playingRole && <span> · {u.playingRole.replace('_', ' ')}</span>}
-            {u.jerseyNumber && <span> · #{u.jerseyNumber}</span>}
           </p>
         </div>
         <div className="flex flex-wrap gap-1 justify-end">
           {member.roles?.map((r: any) => (
             <span key={r.id} className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
               {ROLE_LABELS[r.role] ?? r.role}
+            </span>
+          ))}
+          {member.customRoles?.map((cr: any) => (
+            <span key={cr.id} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-600">
+              {cr.customRole.name}
             </span>
           ))}
         </div>
@@ -67,6 +71,8 @@ export default async function MemberProfilePage({ params }: Props) {
       <Section title="Contact">
         <Row label="Email" value={u.email ?? '—'} />
         <Row label="Phone" value={u.phone ?? '—'} />
+        <Row label="Joined" value={new Date(member.joinedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} />
+        {u.jerseyNumber && <Row label="Jersey #" value={`#${u.jerseyNumber}`} />}
         {u.tshirtSize && <Row label="T-Shirt" value={u.tshirtSize} />}
         {u.cricclubsUrl && (
           <Row label="CricClubs" value={
@@ -76,6 +82,15 @@ export default async function MemberProfilePage({ params }: Props) {
           } />
         )}
       </Section>
+
+      {/* Student Info */}
+      {(u.studentId || u.studentEmail || u.studentProgram) && (
+        <Section title="Student Info">
+          {u.studentId && <Row label="Student ID" value={u.studentId} />}
+          {u.studentEmail && <Row label="Student Email" value={u.studentEmail} />}
+          {u.studentProgram && <Row label="Program" value={u.studentProgram} />}
+        </Section>
+      )}
 
       {/* Emergency Contact */}
       {(u.emergencyContactName || u.emergencyContactPhone) && (
@@ -103,6 +118,58 @@ export default async function MemberProfilePage({ params }: Props) {
                     {reg.status}
                   </span>
                 </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Teams & Tournaments */}
+      {teamAssignments.length > 0 && (
+        <Section title="Teams & Tournaments">
+          <div className="space-y-4">
+            {(teamAssignments as any[]).map((a, i) => (
+              <div key={i} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{a.teamName}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-zinc-400">{a.seasonName}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                      a.seasonStatus === 'active' ? 'bg-green-100 text-green-700'
+                      : a.seasonStatus === 'upcoming' ? 'bg-blue-50 text-blue-600'
+                      : 'bg-zinc-100 text-zinc-500'
+                    }`}>{a.seasonStatus}</span>
+                  </div>
+                </div>
+                {a.tournaments.length === 0 ? (
+                  <p className="pl-3 text-xs text-zinc-400">No tournaments assigned to this team yet</p>
+                ) : (
+                  <div className="divide-y divide-zinc-100">
+                    {a.tournaments.map((t: any) => {
+                      const avail = t.availability?.[0]
+                      return (
+                        <div key={t.id} className="flex items-center justify-between py-1.5 pl-3">
+                          <div>
+                            <span className="text-sm">{t.name}</span>
+                            <span className="ml-2 text-xs text-zinc-400">
+                              {new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {' – '}
+                              {new Date(t.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                            !avail ? 'bg-zinc-100 text-zinc-400'
+                            : avail.status === 'available' ? 'bg-green-100 text-green-700'
+                            : avail.status === 'partial' ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-red-100 text-red-600'
+                          }`}>
+                            {avail ? avail.status : 'not set'}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             ))}
           </div>
