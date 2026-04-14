@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
 
@@ -18,7 +18,14 @@ export function CreateFeeTypeModal({ token, clubId, seasonId, myUserId, apiUrl }
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ name: '', amount: '', studentAmount: '' })
+  const [form, setForm] = useState({ name: '', amount: '', studentAmount: '', isRegistrationFee: false })
+
+  useEffect(() => {
+    if (!open) return
+    const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [open])
 
   function set(field: string, value: string) {
     setForm((f) => ({ ...f, [field]: value }))
@@ -36,6 +43,7 @@ export function CreateFeeTypeModal({ token, clubId, seasonId, myUserId, apiUrl }
           name: form.name,
           amount: parseFloat(form.amount),
           ...(form.studentAmount ? { studentAmount: parseFloat(form.studentAmount) } : {}),
+          isRegistrationFee: form.isRegistrationFee,
           createdById: myUserId,
         }),
       })
@@ -44,7 +52,7 @@ export function CreateFeeTypeModal({ token, clubId, seasonId, myUserId, apiUrl }
         throw new Error(data.error ?? 'Failed to create fee type')
       }
       setOpen(false)
-      setForm({ name: '', amount: '', studentAmount: '' })
+      setForm({ name: '', amount: '', studentAmount: '', isRegistrationFee: false })
       toast(`Fee type "${form.name}" created`)
       router.refresh()
     } catch (e: any) {
@@ -65,7 +73,7 @@ export function CreateFeeTypeModal({ token, clubId, seasonId, myUserId, apiUrl }
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}>
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h2 className="mb-4 text-base font-semibold">Create Fee Type</h2>
             <form onSubmit={submit} className="space-y-4">
@@ -106,6 +114,16 @@ export function CreateFeeTypeModal({ token, clubId, seasonId, myUserId, apiUrl }
                   />
                 </div>
               </div>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.isRegistrationFee}
+                  onChange={(e) => setForm((f) => ({ ...f, isRegistrationFee: e.target.checked }))}
+                  className="rounded border-zinc-300"
+                />
+                <span className="text-sm text-zinc-600">This is a registration fee</span>
+                <span className="text-xs text-zinc-400">(auto-registers member when paid)</span>
+              </label>
               {error && <p className="text-xs text-red-600">{error}</p>}
               <div className="flex justify-end gap-2 pt-2">
                 <button

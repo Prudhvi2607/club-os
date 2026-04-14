@@ -9,10 +9,11 @@ interface Props {
   showPayments: boolean
   fullName: string
   avatarUrl?: string | null
+  latestAnnouncementAt?: string | null
   children: React.ReactNode
 }
 
-export function AppShell({ isBoard, showPayments, fullName, avatarUrl, children }: Props) {
+export function AppShell({ isBoard, showPayments, fullName, avatarUrl, latestAnnouncementAt, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -31,7 +32,7 @@ export function AppShell({ isBoard, showPayments, fullName, avatarUrl, children 
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <Sidebar isBoard={isBoard} showPayments={showPayments} onNavigate={() => setSidebarOpen(false)} />
+        <Sidebar isBoard={isBoard} showPayments={showPayments} latestAnnouncementAt={latestAnnouncementAt} onNavigate={() => setSidebarOpen(false)} />
       </div>
 
       {/* Main content */}

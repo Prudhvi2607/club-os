@@ -2,25 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
-interface NavItem {
-  label: string
-  href: string
-}
-
-const boardNav: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Members', href: '/members' },
-  { label: 'Seasons', href: '/seasons' },
-  { label: 'Teams', href: '/teams' },
-  { label: 'Payments', href: '/payments' },
-  { label: 'Announcements', href: '/announcements' },
-  { label: 'Documents', href: '/documents' },
-  { label: 'My Availability', href: '/availability' },
-  { label: 'Profile', href: '/profile' },
-]
-
-const memberNav: NavItem[] = [
+const memberNav = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'My Team', href: '/my-team' },
   { label: 'My Fees', href: '/my-fees' },
@@ -30,17 +14,58 @@ const memberNav: NavItem[] = [
   { label: 'Profile', href: '/profile' },
 ]
 
+const boardOnlyNav = [
+  { label: 'Members', href: '/members' },
+  { label: 'Seasons', href: '/seasons' },
+  { label: 'Teams', href: '/teams' },
+  { label: 'Payments', href: '/payments' },
+]
+
 interface SidebarProps {
   isBoard: boolean
   showPayments?: boolean
+  latestAnnouncementAt?: string | null
   onNavigate?: () => void
 }
 
-export function Sidebar({ isBoard, showPayments = true, onNavigate }: SidebarProps) {
+export function Sidebar({ isBoard, showPayments = true, latestAnnouncementAt, onNavigate }: SidebarProps) {
   const pathname = usePathname()
-  const nav = isBoard
-    ? boardNav.filter((item) => item.href !== '/payments' || showPayments)
-    : memberNav
+  const [boardOpen, setBoardOpen] = useState(true)
+  const [hasNewAnnouncement, setHasNewAnnouncement] = useState(false)
+
+  useEffect(() => {
+    if (!latestAnnouncementAt) return
+    const seen = localStorage.getItem('last_seen_announcements')
+    if (!seen || new Date(latestAnnouncementAt) > new Date(seen)) {
+      setHasNewAnnouncement(true)
+    }
+  }, [latestAnnouncementAt])
+
+  useEffect(() => {
+    if (pathname === '/announcements') {
+      localStorage.setItem('last_seen_announcements', new Date().toISOString())
+      setHasNewAnnouncement(false)
+    }
+  }, [pathname])
+
+  function NavLink({ href, label }: { href: string; label: string }) {
+    const active = pathname === href || pathname.startsWith(href + '/')
+    const showBadge = href === '/announcements' && hasNewAnnouncement
+    return (
+      <Link
+        href={href}
+        onClick={onNavigate}
+        className={`flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors ${
+          active ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+        }`}
+      >
+        {label}
+        {showBadge && (
+          <span className="ml-2 h-2 w-2 rounded-full bg-blue-400 shrink-0" />
+        )}
+      </Link>
+    )
+  }
 
   return (
     <aside className="flex h-full w-56 flex-col bg-zinc-900 px-3 py-4">
@@ -48,24 +73,32 @@ export function Sidebar({ isBoard, showPayments = true, onNavigate }: SidebarPro
         <span className="text-sm font-semibold text-white">club-os</span>
         <p className="text-xs text-zinc-500 mt-0.5">{process.env.NEXT_PUBLIC_CLUB_NAME ?? 'My Club'}</p>
       </div>
+
       <nav className="flex flex-col gap-0.5">
-        {nav.map((item) => {
-          const active = pathname === item.href
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={`rounded-md px-3 py-2 text-sm transition-colors ${
-                active
-                  ? 'bg-zinc-700 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-              }`}
+        {memberNav.map((item) => (
+          <NavLink key={item.href} href={item.href} label={item.label} />
+        ))}
+
+        {isBoard && (
+          <div className="mt-3">
+            <button
+              onClick={() => setBoardOpen((o) => !o)}
+              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-xs font-medium uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors"
             >
-              {item.label}
-            </Link>
-          )
-        })}
+              <span>Board</span>
+              <span>{boardOpen ? '▾' : '▸'}</span>
+            </button>
+            {boardOpen && (
+              <div className="flex flex-col gap-0.5 mt-0.5">
+                {boardOnlyNav
+                  .filter((item) => item.href !== '/payments' || showPayments)
+                  .map((item) => (
+                    <NavLink key={item.href} href={item.href} label={item.label} />
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
     </aside>
   )

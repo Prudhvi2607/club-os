@@ -1,8 +1,12 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { UploadDocumentModal } from '@/components/upload-document-modal'
 import { DeleteDocumentButton } from '@/components/delete-document-button'
 import { DocumentPreviewModal } from '@/components/document-preview-modal'
+import { formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Documents | club-os' }
 
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 const API_URL = process.env.NEXT_PUBLIC_API_URL!
@@ -45,7 +49,12 @@ export default async function DocumentsPage() {
       </div>
 
       {docs.length === 0 ? (
-        <p className="text-sm text-zinc-400">No documents uploaded yet.</p>
+        <div className="rounded-lg border-2 border-dashed border-zinc-200 bg-white px-6 py-12 text-center">
+          <p className="text-sm font-medium text-zinc-500">No documents uploaded yet</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            {isBoard ? 'Upload bylaws, code of conduct, or other club documents above.' : 'Your board hasn\'t uploaded any documents yet.'}
+          </p>
+        </div>
       ) : (
         <div className="space-y-6">
           {categoryOrder.filter((c) => grouped[c]?.length).map((cat) => (
@@ -66,7 +75,7 @@ export default async function DocumentsPage() {
                             )}
                           </div>
                           <p className="text-xs text-zinc-400 mt-0.5">
-                            Uploaded by {doc.uploadedBy.fullName} · {new Date(doc.uploadedAt).toLocaleDateString()}
+                            Uploaded by {doc.uploadedBy.fullName} · {formatDate(doc.uploadedAt)}
                           </p>
                         </td>
                         <td className="px-4 py-3 text-right whitespace-nowrap">

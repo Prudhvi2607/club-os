@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
 
@@ -28,6 +28,13 @@ export function RecordPaymentModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const remaining = amountDue - amountPaid
+
+  useEffect(() => {
+    if (!open) return
+    const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [open])
   const [form, setForm] = useState({ amount: String(remaining > 0 ? remaining : ''), method: 'venmo', notes: '' })
 
   function set(field: string, value: string) {
@@ -74,7 +81,7 @@ export function RecordPaymentModal({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}>
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h2 className="mb-1 text-base font-semibold">Record Payment</h2>
             <p className="mb-4 text-xs text-zinc-400">

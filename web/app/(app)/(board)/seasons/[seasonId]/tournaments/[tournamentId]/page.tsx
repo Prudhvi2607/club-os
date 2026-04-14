@@ -1,7 +1,11 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
+import { formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Tournament | club-os' }
 
 export default async function TournamentDetailPage({
   params,
@@ -34,8 +38,8 @@ export default async function TournamentDetailPage({
 
       {/* Info */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <InfoCard label="Start Date" value={new Date(tournament.startDate).toLocaleDateString()} />
-        <InfoCard label="End Date" value={new Date(tournament.endDate).toLocaleDateString()} />
+        <InfoCard label="Start Date" value={formatDate(tournament.startDate)} />
+        <InfoCard label="End Date" value={formatDate(tournament.endDate)} />
         <InfoCard label="Teams" value={String(tournament.teams.length)} />
       </div>
 

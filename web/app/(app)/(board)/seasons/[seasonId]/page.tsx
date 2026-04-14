@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/auth'
@@ -5,6 +6,9 @@ import { api } from '@/lib/api'
 import { SeasonStatusSelect } from '@/components/season-status-select'
 import { CreateTournamentModal } from '@/components/create-tournament-modal'
 import { DeleteTournamentButton } from '@/components/delete-tournament-button'
+import { formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Season | club-os' }
 
 export const dynamic = 'force-dynamic'
 
@@ -34,9 +38,6 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
 
   if (!season) notFound()
 
-  const paidRegFeeCount = paymentSummary
-    ? paymentSummary.fees.filter((f) => f.feeType.name === 'Registration Fee' && f.status === 'paid').length
-    : 0
 
   const totalMembers = availData?.registrations.length ?? 0
   const availSummary = tournaments.map((t) => {
@@ -67,9 +68,11 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
 
       {/* Season info cards */}
       <div className="grid grid-cols-3 gap-4">
-        <InfoCard label="Start Date" value={new Date(season.startDate).toLocaleDateString()} />
-        <InfoCard label="End Date" value={new Date(season.endDate).toLocaleDateString()} />
-        <InfoCard label="Reg Fee Paid" value={String(paidRegFeeCount)} />
+        <InfoCard label="Start Date" value={formatDate(season.startDate)} />
+        <InfoCard label="End Date" value={formatDate(season.endDate)} />
+        <Link href={`/seasons/${seasonId}/registrations`} className="block rounded-lg hover:ring-2 hover:ring-zinc-200 transition-all">
+          <InfoCard label="Registrations" value={String(availData?.registrations.length ?? 0)} sub="click to view fees" />
+        </Link>
       </div>
 
       {/* Payment summary */}
@@ -170,8 +173,8 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
                         {t.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-zinc-500">{new Date(t.startDate).toLocaleDateString()}</td>
-                    <td className="px-4 py-3 text-zinc-500">{new Date(t.endDate).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-zinc-500">{formatDate(t.startDate)}</td>
+                    <td className="px-4 py-3 text-zinc-500">{formatDate(t.endDate)}</td>
                     {isBoardOnly && (
                       <td className="px-4 py-3 text-right">
                         <DeleteTournamentButton

@@ -1,6 +1,10 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { SubmitPaymentRequestButton } from '@/components/submit-payment-request-button'
+import { formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'My Fees | club-os' }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
@@ -37,11 +41,23 @@ export default async function MyFeesPage() {
       <h1 className="text-xl font-semibold">My Fees</h1>
 
       {fees.length === 0 ? (
-        <p className="text-sm text-zinc-400">
-          {openSeason ? `No fees assigned for the ${openSeason.year} season.` : 'No active season.'}
-        </p>
+        <div className="rounded-lg border-2 border-dashed border-zinc-200 bg-white px-6 py-12 text-center">
+          <p className="text-sm font-medium text-zinc-500">
+            {openSeason ? `No fees assigned for the ${openSeason.year} season` : 'No active season'}
+          </p>
+          <p className="mt-1 text-xs text-zinc-400">Your board will assign fees when they're ready.</p>
+        </div>
       ) : (
         <>
+          {/* Outstanding banner */}
+          {outstanding > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-3 flex items-center justify-between gap-4">
+              <p className="text-sm text-amber-800">
+                You have <span className="font-semibold">${outstanding.toFixed(0)}</span> outstanding. Use the <span className="font-medium">"I paid"</span> button next to each fee after you send payment.
+              </p>
+            </div>
+          )}
+
           {/* Summary */}
           <div className="grid grid-cols-3 gap-4">
             <StatCard label="Total Due" value={`$${totalDue.toFixed(0)}`} />
@@ -50,8 +66,8 @@ export default async function MyFeesPage() {
           </div>
 
           {/* Fee list */}
-          <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="rounded-lg border border-zinc-200 bg-white overflow-x-auto">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50">
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wide">Fee</th>
@@ -80,7 +96,7 @@ export default async function MyFeesPage() {
                         <div className="space-y-0.5">
                           {f.payments.map((p) => (
                             <div key={p.id} className="text-xs text-zinc-500">
-                              ${Number(p.amount).toFixed(0)} via {p.method} · {new Date(p.paidAt).toLocaleDateString()}
+                              ${Number(p.amount).toFixed(0)} via {p.method} · {formatDate(p.paidAt)}
                             </div>
                           ))}
                         </div>

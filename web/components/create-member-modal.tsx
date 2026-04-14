@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
 
@@ -33,6 +33,13 @@ export function CreateMemberModal({ token, clubId, apiUrl }: Props) {
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [open])
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     fullName: '',
@@ -95,7 +102,7 @@ export function CreateMemberModal({ token, clubId, apiUrl }: Props) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}>
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <h2 className="mb-4 text-base font-semibold">Add Member</h2>
             <form onSubmit={submit} className="space-y-4">

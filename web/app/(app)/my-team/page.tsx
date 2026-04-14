@@ -1,5 +1,8 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
+
+export const metadata: Metadata = { title: 'My Team | club-os' }
 
 export default async function MyTeamPage() {
   
@@ -36,7 +39,10 @@ export default async function MyTeamPage() {
       <h1 className="text-xl font-semibold">My Team</h1>
 
       {myTeams.length === 0 ? (
-        <p className="text-sm text-zinc-400">You haven't been assigned to a team for the {openSeason.year} season yet.</p>
+        <div className="rounded-lg border-2 border-dashed border-zinc-200 bg-white px-6 py-12 text-center">
+          <p className="text-sm font-medium text-zinc-500">Not assigned to a team yet</p>
+          <p className="mt-1 text-xs text-zinc-400">Your board will assign you to a team for the {openSeason.year} season.</p>
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {myTeams.map((team) => (

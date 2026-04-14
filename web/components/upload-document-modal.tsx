@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/toast-provider'
@@ -23,6 +23,13 @@ export function UploadDocumentModal({ token, apiUrl, clubId, uploadedById }: Pro
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [open])
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('other')
   const [visibility, setVisibility] = useState('club')
@@ -83,7 +90,7 @@ export function UploadDocumentModal({ token, apiUrl, clubId, uploadedById }: Pro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}>
       <form
         onSubmit={submit}
         className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl space-y-4"

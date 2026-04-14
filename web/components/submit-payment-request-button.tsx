@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
 
@@ -23,6 +23,13 @@ export function SubmitPaymentRequestButton({ feeId, memberId, feeName, amountDue
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ amount: String(amountDue - amountPaid), method: 'venmo', notes: '' })
+
+  useEffect(() => {
+    if (!open) return
+    const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [open])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -51,13 +58,13 @@ export function SubmitPaymentRequestButton({ feeId, memberId, feeName, amountDue
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+        className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 transition-colors"
       >
-        I made a payment
+        I paid
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}>
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl text-left">
             <h2 className="mb-1 text-base font-semibold">Report Payment</h2>
             <p className="mb-4 text-sm text-zinc-500">{feeName}</p>

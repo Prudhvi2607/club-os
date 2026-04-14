@@ -1,7 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
+import { formatDate, formatDateShort } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Member Profile | club-os' }
 
 const STATUS_BADGE: Record<string, string> = {
   paid: 'bg-green-100 text-green-700',
@@ -71,7 +75,7 @@ export default async function MemberProfilePage({ params }: Props) {
       <Section title="Contact">
         <Row label="Email" value={u.email ?? '—'} />
         <Row label="Phone" value={u.phone ?? '—'} />
-        <Row label="Joined" value={new Date(member.joinedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} />
+        <Row label="Joined" value={formatDate(member.joinedAt)} />
         {u.jerseyNumber && <Row label="Jersey #" value={`#${u.jerseyNumber}`} />}
         {u.tshirtSize && <Row label="T-Shirt" value={u.tshirtSize} />}
         {u.cricclubsUrl && (
@@ -152,9 +156,9 @@ export default async function MemberProfilePage({ params }: Props) {
                           <div>
                             <span className="text-sm">{t.name}</span>
                             <span className="ml-2 text-xs text-zinc-400">
-                              {new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {formatDateShort(t.startDate)}
                               {' – '}
-                              {new Date(t.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {formatDateShort(t.endDate)}
                             </span>
                           </div>
                           <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
@@ -196,7 +200,7 @@ export default async function MemberProfilePage({ params }: Props) {
                 {fee.payments?.map((p: any) => (
                   <div key={p.id} className="flex items-center justify-between pl-3 text-xs text-zinc-400">
                     <span>
-                      {new Date(p.paidAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {formatDate(p.paidAt)}
                       {p.notes && <span> · {p.notes}</span>}
                     </span>
                     <span className="capitalize">${Number(p.amount).toFixed(2)} · {p.method}</span>

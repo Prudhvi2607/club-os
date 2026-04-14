@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { auth } from '@/auth'
@@ -7,6 +8,9 @@ import { MemberStatusSelect } from '@/components/member-status-select'
 import { MemberRolesEditor } from '@/components/member-roles-editor'
 import { DeleteMemberButton } from '@/components/delete-member-button'
 import { EditMemberModal } from '@/components/edit-member-modal'
+import { formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Members | club-os' }
 import { ManageCustomRoles } from '@/components/manage-custom-roles'
 import { MembersFilterRow } from '@/components/members-filter-bar'
 import { ExportMembersButton } from '@/components/export-members-button'
@@ -99,7 +103,7 @@ export default async function MembersPage({ searchParams }: Props) {
                   />
                 </td>
                 <td className="px-4 py-3 text-zinc-400">
-                  {new Date(m.joinedAt).toLocaleDateString()}
+                  {formatDate(m.joinedAt)}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-3">

@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
+
+export const metadata: Metadata = { title: 'Teams | club-os' }
 import { CreateTeamModal } from '@/components/create-team-modal'
 import { SeasonPicker } from '@/components/season-picker'
 import { TeamSquadManager } from '@/components/team-squad-manager'

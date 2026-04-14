@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { TournamentAvailabilityGrid } from '@/components/tournament-availability-grid'
+
+export const metadata: Metadata = { title: 'My Availability | club-os' }
 
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 const API_URL = process.env.NEXT_PUBLIC_API_URL!

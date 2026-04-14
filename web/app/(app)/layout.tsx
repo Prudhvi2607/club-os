@@ -11,10 +11,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const token = (session as any).accessToken ?? ''
 
-  const me = await api.me(token).catch((e) => {
-    console.error('[layout] /me error:', e.message)
-    return null
-  })
+  const [me, recentAnnouncements] = await Promise.all([
+    api.me(token).catch((e) => {
+      console.error('[layout] /me error:', e.message)
+      return null
+    }),
+    api.announcements.list(token, { limit: 1 }).catch(() => []),
+  ])
+  const latestAnnouncementAt = recentAnnouncements[0]?.sentAt ?? null
 
   if (!me) {
     return (
@@ -40,6 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         showPayments={isBoardOnly}
         fullName={me.fullName}
         avatarUrl={me.avatarUrl}
+        latestAnnouncementAt={latestAnnouncementAt}
       >
         {children}
       </AppShell>

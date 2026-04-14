@@ -1,7 +1,11 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { CreateAnnouncementModal } from '@/components/create-announcement-modal'
 import { DeleteAnnouncementButton } from '@/components/delete-announcement-button'
+import { formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Announcements | club-os' }
 
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 const API_URL = process.env.NEXT_PUBLIC_API_URL!
@@ -38,8 +42,11 @@ export default async function AnnouncementsPage() {
       </div>
 
       {visible.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400 text-sm">
-          No announcements yet.
+        <div className="rounded-lg border-2 border-dashed border-zinc-200 bg-white px-6 py-12 text-center">
+          <p className="text-sm font-medium text-zinc-500">No announcements yet</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            {isBoard ? 'Post an announcement to notify club members above.' : 'Your board hasn\'t posted any announcements yet.'}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -58,7 +65,7 @@ export default async function AnnouncementsPage() {
                   <p className="mt-1 text-sm text-zinc-600 whitespace-pre-wrap">{a.body}</p>
                 </div>
                 <div className="shrink-0 flex flex-col items-end gap-2">
-                  <span className="text-xs text-zinc-400">{new Date(a.sentAt).toLocaleDateString()}</span>
+                  <span className="text-xs text-zinc-400">{formatDate(a.sentAt)}</span>
                   {isBoard && <DeleteAnnouncementButton announcementId={a.id} token={token} clubId={CLUB_ID} apiUrl={API_URL} />}
                 </div>
               </div>

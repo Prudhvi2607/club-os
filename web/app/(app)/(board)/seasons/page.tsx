@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Fragment } from 'react'
 import Link from 'next/link'
 import { auth } from '@/auth'
@@ -6,6 +7,9 @@ import type { Tournament } from '@/lib/api'
 import { CreateSeasonModal } from '@/components/create-season-modal'
 import { SeasonStatusSelect } from '@/components/season-status-select'
 import { DeleteSeasonButton } from '@/components/delete-season-button'
+import { formatDate, formatDateShort } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Seasons | club-os' }
 
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!
 const API_URL = process.env.NEXT_PUBLIC_API_URL!
@@ -65,7 +69,7 @@ export default async function SeasonsPage() {
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-zinc-500">
-                      {new Date(s.startDate).toLocaleDateString()} – {new Date(s.endDate).toLocaleDateString()}
+                      {formatDate(s.startDate)} – {formatDate(s.endDate)}
                     </td>
                     <td className="px-4 py-3 text-zinc-500">{s._count.registrations}</td>
                     <td className="px-4 py-3">
@@ -87,7 +91,7 @@ export default async function SeasonsPage() {
                             >
                               {t.name}
                               <span className="text-zinc-400">
-                                {new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}–{new Date(t.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {formatDateShort(t.startDate)}–{formatDateShort(t.endDate)}
                               </span>
                             </Link>
                           ))}
