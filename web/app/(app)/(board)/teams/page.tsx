@@ -1,11 +1,12 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
-
-export const metadata: Metadata = { title: 'Teams | club-os' }
 import { CreateTeamModal } from '@/components/create-team-modal'
 import { SeasonPicker } from '@/components/season-picker'
+
+export const metadata: Metadata = { title: 'Teams | club-os' }
 import { TeamSquadManager } from '@/components/team-squad-manager'
 
 const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID!

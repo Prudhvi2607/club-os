@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'

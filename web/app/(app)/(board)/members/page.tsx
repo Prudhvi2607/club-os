@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
@@ -9,9 +10,9 @@ import { MemberRolesEditor } from '@/components/member-roles-editor'
 import { DeleteMemberButton } from '@/components/delete-member-button'
 import { EditMemberModal } from '@/components/edit-member-modal'
 import { formatDate } from '@/lib/format'
+import { ManageCustomRoles } from '@/components/manage-custom-roles'
 
 export const metadata: Metadata = { title: 'Members | club-os' }
-import { ManageCustomRoles } from '@/components/manage-custom-roles'
 import { MembersFilterRow } from '@/components/members-filter-bar'
 import { ExportMembersButton } from '@/components/export-members-button'
 

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { auth } from '@/auth'
 import { api } from '@/lib/api'
 import { EditProfileForm } from '@/components/edit-profile-form'
