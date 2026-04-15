@@ -97,14 +97,16 @@ model User {
   cricclubsUrl                  String?
   createdAt                     DateTime  @default(now())
 
-  clubMemberships     ClubMember[]
-  assignedBy          TeamAssignment[] @relation("AssignedBy")
-  recordedPayments    Payment[]
-  sentAnnouncements   Announcement[]
-  uploadedDocuments   ClubDocument[]
-  createdSeasons      Season[]
-  createdFeeTypes     FeeType[]
-  createdTournaments  Tournament[]
+  clubMemberships          ClubMember[]
+  assignedBy               TeamAssignment[] @relation("AssignedBy")
+  recordedPayments         Payment[]
+  sentAnnouncements        Announcement[]
+  uploadedDocuments        ClubDocument[]
+  createdSeasons           Season[]
+  createdFeeTypes          FeeType[]
+  createdTournaments       Tournament[]
+  recordedContributions    SponsorContribution[]
+  recordedExpenses         Expense[]
 }
 
 model Club {
@@ -114,14 +116,17 @@ model Club {
   slug      String   @unique
   createdAt DateTime @default(now())
 
-  members       ClubMember[]
-  seasons       Season[]
-  teams         Team[]
-  announcements Announcement[]
-  documents     ClubDocument[]
-  tournaments   Tournament[]
-  feeTypes      FeeType[]
-  customRoles   ClubCustomRole[]
+  members               ClubMember[]
+  seasons               Season[]
+  teams                 Team[]
+  announcements         Announcement[]
+  documents             ClubDocument[]
+  tournaments           Tournament[]
+  feeTypes              FeeType[]
+  customRoles           ClubCustomRole[]
+  sponsors              Sponsor[]
+  sponsorContributions  SponsorContribution[]
+  expenses              Expense[]
 }
 
 model ClubMember {
@@ -191,13 +196,15 @@ model Season {
   status    SeasonStatus @default(upcoming)
   createdBy String
 
-  club          Club                 @relation(fields: [clubId], references: [id])
-  creator       User                 @relation(fields: [createdBy], references: [id])
-  registrations SeasonRegistration[]
-  teamAssignments TeamAssignment[]
-  feeTypes      FeeType[]
-  tournaments   Tournament[]
-  availability  MemberAvailability[]
+  club                  Club                  @relation(fields: [clubId], references: [id])
+  creator               User                  @relation(fields: [createdBy], references: [id])
+  registrations         SeasonRegistration[]
+  teamAssignments       TeamAssignment[]
+  feeTypes              FeeType[]
+  tournaments           Tournament[]
+  availability          MemberAvailability[]
+  sponsorContributions  SponsorContribution[]
+  expenses              Expense[]
 }
 
 model SeasonRegistration {
@@ -362,7 +369,65 @@ model PaymentRequest {
   clubMember ClubMember @relation(fields: [clubMemberId], references: [id])
 }
 
-// ─── Group 6: Announcements ───────────────────────────────────────────────────
+// ─── Group 6: Treasury (Sponsors & Expenses) ─────────────────────────────────
+
+enum ExpenseCategory {
+  equipment
+  venue
+  travel
+  uniforms
+  food
+  registration_fees
+  other
+}
+
+model Sponsor {
+  id           String   @id @default(uuid())
+  clubId       String
+  name         String
+  contactName  String?
+  contactEmail String?
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  club          Club                  @relation(fields: [clubId], references: [id])
+  contributions SponsorContribution[]
+}
+
+model SponsorContribution {
+  id           String   @id @default(uuid())
+  clubId       String
+  sponsorId    String
+  seasonId     String?
+  amount       Decimal
+  description  String?
+  receivedAt   DateTime @default(now())
+  recordedById String
+
+  club       Club    @relation(fields: [clubId], references: [id])
+  sponsor    Sponsor @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  season     Season? @relation(fields: [seasonId], references: [id])
+  recordedBy User    @relation(fields: [recordedById], references: [id])
+}
+
+model Expense {
+  id           String          @id @default(uuid())
+  clubId       String
+  seasonId     String?
+  category     ExpenseCategory
+  description  String
+  amount       Decimal
+  paidAt       DateTime        @default(now())
+  recordedById String
+  notes        String?
+  createdAt    DateTime        @default(now())
+
+  club       Club    @relation(fields: [clubId], references: [id])
+  season     Season? @relation(fields: [seasonId], references: [id])
+  recordedBy User    @relation(fields: [recordedById], references: [id])
+}
+
+// ─── Group 7: Announcements ───────────────────────────────────────────────────
 
 model Announcement {
   id       String               @id @default(uuid())

@@ -122,6 +122,9 @@ export default async function paymentsRoutes(app: FastifyInstance) {
     if (!member) return reply.code(404).send({ error: 'Member not found' })
     if (!feeType) return reply.code(404).send({ error: 'Fee type not found' })
 
+    const existing = await prisma.memberFee.findFirst({ where: { feeTypeId, clubMemberId: memberId } })
+    if (existing) return reply.code(409).send({ error: 'Fee already assigned to this member' })
+
     const fee = await prisma.memberFee.create({
       data: {
         feeTypeId,
@@ -149,6 +152,7 @@ export default async function paymentsRoutes(app: FastifyInstance) {
 
     const memberFee = await prisma.memberFee.findFirst({
       where: { id: feeId, clubMemberId: memberId },
+      include: { feeType: true },
     })
     if (!memberFee) return reply.code(404).send({ error: 'Fee not found' })
 
@@ -166,16 +170,32 @@ export default async function paymentsRoutes(app: FastifyInstance) {
 
       const newAmountPaid = Number(memberFee.amountPaid) + amount
       const newStatus: FeeStatus =
-        newAmountPaid >= Number(memberFee.amountDue)
-          ? 'paid'
-          : newAmountPaid > 0
-            ? 'partial'
-            : 'pending'
+        newAmountPaid >= Number(memberFee.amountDue) ? 'paid'
+        : newAmountPaid > 0 ? 'partial'
+        : 'pending'
 
       await tx.memberFee.update({
         where: { id: feeId },
         data: { amountPaid: newAmountPaid, status: newStatus },
       })
+
+      // Auto-register member when registration fee is fully paid
+      if (newStatus === 'paid' && memberFee.feeType.isRegistrationFee) {
+        const seasonId = memberFee.feeType.seasonId
+        const existing = await tx.seasonRegistration.findFirst({
+          where: { seasonId, clubMemberId: memberId },
+        })
+        if (!existing) {
+          await tx.seasonRegistration.create({
+            data: { seasonId, clubMemberId: memberId, memberType: 'regular', status: 'active' },
+          })
+        } else if (existing.status !== 'active') {
+          await tx.seasonRegistration.update({
+            where: { id: existing.id },
+            data: { status: 'active' },
+          })
+        }
+      }
 
       return payment
     })

@@ -13,6 +13,7 @@ import customRolesRoutes from './routes/custom-roles.js'
 import tournamentsRoutes from './routes/tournaments.js'
 import availabilityRoutes from './routes/availability.js'
 import documentsRoutes from './routes/documents.js'
+import treasuryRoutes from './routes/treasury.js'
 
 const app = Fastify({ logger: true })
 
@@ -41,6 +42,7 @@ app.register(customRolesRoutes)
 app.register(tournamentsRoutes)
 app.register(availabilityRoutes)
 app.register(documentsRoutes)
+app.register(treasuryRoutes)
 
 app.listen({ port: Number(process.env.PORT ?? 3001), host: '0.0.0.0' }, (err) => {
   if (err) {

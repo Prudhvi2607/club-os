@@ -19,6 +19,7 @@ const boardOnlyNav = [
   { label: 'Seasons', href: '/seasons' },
   { label: 'Teams', href: '/teams' },
   { label: 'Payments', href: '/payments' },
+  { label: 'Treasury', href: '/treasury' },
 ]
 
 interface SidebarProps {

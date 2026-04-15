@@ -199,6 +199,48 @@ export interface Me {
   }[]
 }
 
+export interface Sponsor {
+  id: string
+  name: string
+  contactName: string | null
+  contactEmail: string | null
+  notes: string | null
+  createdAt: string
+  contributions: SponsorContribution[]
+  _count: { contributions: number }
+}
+
+export interface SponsorContribution {
+  id: string
+  sponsorId: string
+  clubId: string
+  seasonId: string | null
+  amount: string
+  description: string | null
+  receivedAt: string
+  recordedById: string
+}
+
+export interface Expense {
+  id: string
+  clubId: string
+  seasonId: string | null
+  category: string
+  description: string
+  amount: string
+  paidAt: string
+  notes: string | null
+  createdAt: string
+}
+
+export interface TreasurySummary {
+  totalSponsorIncome: number
+  totalMemberFees: number
+  totalIncome: number
+  totalExpenses: number
+  net: number
+}
+
 export interface CustomRole {
   id: string
   name: string
@@ -382,6 +424,36 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(body),
       }),
+  },
+
+  treasury: {
+    sponsors: (token: string) =>
+      apiFetch<Sponsor[]>(`/clubs/${CLUB_ID}/sponsors`, token),
+    createSponsor: (token: string, body: Record<string, unknown>) =>
+      apiFetch<Sponsor>(`/clubs/${CLUB_ID}/sponsors`, token, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    deleteSponsor: (token: string, sponsorId: string) =>
+      apiFetch(`/clubs/${CLUB_ID}/sponsors/${sponsorId}`, token, { method: 'DELETE' }),
+    addContribution: (token: string, sponsorId: string, body: Record<string, unknown>) =>
+      apiFetch<SponsorContribution>(`/clubs/${CLUB_ID}/sponsors/${sponsorId}/contributions`, token, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    deleteContribution: (token: string, sponsorId: string, contributionId: string) =>
+      apiFetch(`/clubs/${CLUB_ID}/sponsors/${sponsorId}/contributions/${contributionId}`, token, { method: 'DELETE' }),
+    expenses: (token: string, seasonId?: string) =>
+      apiFetch<Expense[]>(`/clubs/${CLUB_ID}/expenses${seasonId ? `?seasonId=${seasonId}` : ''}`, token),
+    createExpense: (token: string, body: Record<string, unknown>) =>
+      apiFetch<Expense>(`/clubs/${CLUB_ID}/expenses`, token, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    deleteExpense: (token: string, expenseId: string) =>
+      apiFetch(`/clubs/${CLUB_ID}/expenses/${expenseId}`, token, { method: 'DELETE' }),
+    summary: (token: string, seasonId?: string) =>
+      apiFetch<TreasurySummary>(`/clubs/${CLUB_ID}/treasury/summary${seasonId ? `?seasonId=${seasonId}` : ''}`, token),
   },
 
   announcements: {
