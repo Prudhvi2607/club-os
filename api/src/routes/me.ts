@@ -59,6 +59,7 @@ export default async function meRoutes(app: FastifyInstance) {
     }
 
     if (!user) {
+      req.log.warn({ supabaseId: authUser.id, email: authUser.email }, 'Login attempt from unregistered user')
       return reply.code(404).send({ error: 'No club membership found for this account.' })
     }
 
