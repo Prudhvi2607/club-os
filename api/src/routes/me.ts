@@ -35,8 +35,8 @@ export default async function meRoutes(app: FastifyInstance) {
 
     if (!user && authUser.email) {
       // Try matching an existing record by email (board pre-created them)
-      const byEmail = await prisma.user.findUnique({
-        where: { email: authUser.email },
+      const byEmail = await prisma.user.findFirst({
+        where: { email: { equals: authUser.email, mode: 'insensitive' } },
         include: {
           clubMemberships: {
             include: { roles: true, club: true },
