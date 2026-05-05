@@ -11,21 +11,34 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const token = (session as any).accessToken ?? ''
 
-  const [me, recentAnnouncements] = await Promise.all([
+  let me = null
+  let apiDown = false
+  const [meResult, recentAnnouncements] = await Promise.all([
     api.me(token).catch((e) => {
       console.error('[layout] /me error:', e.message)
+      if (e.status !== 404) apiDown = true
       return null
     }),
     api.announcements.list(token, { limit: 1 }).catch(() => []),
   ])
+  me = meResult
   const latestAnnouncementAt = recentAnnouncements[0]?.sentAt ?? null
 
   if (!me) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
-          <p className="font-medium">You're not a member of any club yet.</p>
-          <p className="text-sm text-zinc-500">Ask your board to add you to the club.</p>
+          {apiDown ? (
+            <>
+              <p className="font-medium">Something went wrong. Please try again in a moment.</p>
+              <p className="text-sm text-zinc-500">If this keeps happening, contact your board.</p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">You're not a member of any club yet.</p>
+              <p className="text-sm text-zinc-500">Ask your board to add you to the club.</p>
+            </>
+          )}
           <SignOutButton />
         </div>
       </div>
