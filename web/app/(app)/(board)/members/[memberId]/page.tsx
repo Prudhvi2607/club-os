@@ -32,7 +32,7 @@ export default async function MemberProfilePage({ params }: Props) {
   const token = (session as any)?.accessToken ?? ''
 
   const [member, teamAssignments] = await Promise.all([
-    api.members.get(token, memberId).catch(() => null) as any,
+    api.members.get(token, memberId).catch((e) => { if (e.status === 404) return null; throw e }) as any,
     api.members.teams(token, memberId).catch(() => []),
   ])
   if (!member) notFound()

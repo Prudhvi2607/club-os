@@ -20,8 +20,8 @@ export default async function TournamentDetailPage({
   const token = (session as any)?.accessToken ?? ''
 
   const [tournament, season] = await Promise.all([
-    api.tournaments.get(token, seasonId, tournamentId).catch(() => null),
-    api.seasons.get(token, seasonId).catch(() => null),
+    api.tournaments.get(token, seasonId, tournamentId).catch((e) => { if (e.status === 404) return null; throw e }),
+    api.seasons.get(token, seasonId).catch((e) => { if (e.status === 404) return null; throw e }),
   ])
 
   if (!tournament || !season) notFound()

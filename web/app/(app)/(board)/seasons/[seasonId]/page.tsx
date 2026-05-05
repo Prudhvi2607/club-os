@@ -30,7 +30,7 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
   const isBoardOnly = roles.includes('board')
 
   const [season, paymentSummary, tournaments, availData] = await Promise.all([
-    api.seasons.get(token, seasonId).catch(() => null),
+    api.seasons.get(token, seasonId).catch((e) => { if (e.status === 404) return null; throw e }),
     isBoardOnly ? api.payments.summary(token, seasonId).catch(() => null) : Promise.resolve(null),
     api.tournaments.list(token, seasonId).catch(() => []),
     api.availability.season(token, seasonId).catch(() => null),
