@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 const PLAYING_ROLES = ['batter', 'bowler', 'allrounder', 'wicket_keeper'] as const
 const TSHIRT_SIZES = ['38', '40', '42', '44', '46', '48'] as const
@@ -71,8 +72,8 @@ export function EditProfileForm({ token, apiUrl, takenJerseyNumbers, initial }: 
       }
       toast('Profile saved')
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setLoading(false)
     }

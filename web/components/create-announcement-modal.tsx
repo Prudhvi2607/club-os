@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Team {
   id: string
@@ -58,8 +59,8 @@ export function CreateAnnouncementModal({ sentById, teams, token, clubId, apiUrl
       setForm({ subject: '', body: '', audience: 'club', teamId: '' })
       toast('Announcement sent')
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setLoading(false)
     }

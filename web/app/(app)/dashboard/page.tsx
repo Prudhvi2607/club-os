@@ -16,7 +16,7 @@ const AVAIL_BADGE: Record<string, string> = {
 
 export default async function DashboardPage() {
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [me, seasons, announcements] = await Promise.all([
     api.me(token).catch(() => null),

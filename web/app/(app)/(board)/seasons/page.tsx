@@ -18,7 +18,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL!
 export default async function SeasonsPage() {
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [seasons, me] = await Promise.all([
     api.seasons.list(token).catch(() => []),

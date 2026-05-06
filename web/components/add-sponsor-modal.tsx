@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   token: string
@@ -42,8 +43,8 @@ export function AddSponsorModal({ token, apiUrl, clubId, onAdded }: Props) {
       setContactEmail('')
       setNotes('')
       onAdded()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(toErrorMessage(err))
     } finally {
       setSaving(false)
     }

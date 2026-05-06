@@ -10,7 +10,7 @@ export function ExportMembersButton({ members }: { members: Member[] }) {
       m.user.email ?? '',
       m.user.phone ?? '',
       m.user.playingRole?.replace('_', ' ') ?? '',
-      m.roles.map((r: any) => r.role.replace('_', ' ')).join(', '),
+      m.roles.map((r) => r.role.replace('_', ' ')).join(', '),
       m.status,
       new Date(m.joinedAt).toLocaleDateString(),
     ])

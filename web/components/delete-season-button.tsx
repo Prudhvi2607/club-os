@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   seasonId: string
@@ -32,8 +33,8 @@ export function DeleteSeasonButton({ seasonId, seasonName, token, clubId, apiUrl
       setOpen(false)
       toast(`${seasonName} deleted`)
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setLoading(false)
     }

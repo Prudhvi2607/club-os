@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 const CATEGORIES = [
   { value: 'bylaws', label: 'Bylaws / Constitution' },
@@ -71,8 +72,8 @@ export function UploadDocumentModal({ token, apiUrl, clubId, uploadedById }: Pro
       reset()
       setOpen(false)
       router.refresh()
-    } catch (err: any) {
-      toast(err.message, 'error')
+    } catch (err: unknown) {
+      toast(toErrorMessage(err), 'error')
     } finally {
       setLoading(false)
     }

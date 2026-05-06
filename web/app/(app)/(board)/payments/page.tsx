@@ -26,7 +26,7 @@ export default async function PaymentsPage({ searchParams }: Props) {
 
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [seasons, me] = await Promise.all([
     api.seasons.list(token).catch(() => []),

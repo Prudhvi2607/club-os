@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { RecordPaymentModal } from '@/components/record-payment-modal'
 import { UndoPaymentButton } from '@/components/undo-payment-button'
 import { formatDateShort } from '@/lib/format'
+import type { MemberFee, Member } from '@/lib/api'
 
 const STATUS_BADGE: Record<string, string> = {
   paid: 'bg-green-100 text-green-700',
@@ -12,7 +13,7 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 interface Props {
-  fees: any[]
+  fees: (MemberFee & { clubMember: Member })[]
   feeTypesEmpty: boolean
   myUserId: string
   token: string
@@ -90,7 +91,7 @@ export function PaymentsTable({ fees, feeTypesEmpty, myUserId, token, clubId, ap
                   <td className="sticky left-32 bg-white px-4 py-3 text-right">${Number(fee.amountDue).toFixed(2)}</td>
                   <td className="px-4 py-3 text-right">
                     <div>${Number(fee.amountPaid).toFixed(2)}</div>
-                    {fee.payments.map((payment: any) => (
+                    {fee.payments.map((payment) => (
                       <div key={payment.id} className="text-xs text-zinc-400 mt-0.5 capitalize">
                         {payment.method} · {formatDateShort(payment.paidAt)}
                       </div>
@@ -118,7 +119,7 @@ export function PaymentsTable({ fees, feeTypesEmpty, myUserId, token, clubId, ap
                           apiUrl={apiUrl}
                         />
                       )}
-                      {fee.payments.map((payment: any) => (
+                      {fee.payments.map((payment) => (
                         <UndoPaymentButton
                           key={payment.id}
                           paymentId={payment.id}

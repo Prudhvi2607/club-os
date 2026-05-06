@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   paymentId: string
@@ -30,8 +31,8 @@ export function UndoPaymentButton({ paymentId, feeId, memberId, amount, token, c
       if (!res.ok) throw new Error('Failed to undo payment')
       toast(`$${amount.toFixed(2)} payment undone`)
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setLoading(false)
       setConfirming(false)

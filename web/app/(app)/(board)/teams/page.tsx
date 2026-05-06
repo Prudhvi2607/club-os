@@ -21,7 +21,7 @@ export default async function TeamsPage({ searchParams }: Props) {
 
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [seasons, members, me] = await Promise.all([
     api.seasons.list(token).catch(() => []),

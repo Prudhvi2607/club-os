@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toErrorMessage } from '@/lib/errors'
 
 const CATEGORIES = [
   { value: 'equipment', label: 'Equipment' },
@@ -72,8 +73,8 @@ export function AddExpenseModal({ seasons, token, apiUrl, clubId, recordedById, 
       setPaidAt('')
       setNotes('')
       onAdded()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(toErrorMessage(err))
     } finally {
       setSaving(false)
     }

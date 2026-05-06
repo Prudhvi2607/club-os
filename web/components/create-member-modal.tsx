@@ -3,24 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
+import { ROLES, ROLE_LABELS, PLAYING_ROLE_LABELS, Field, inputCls } from '@/components/member-form-shared'
 
-const ROLES = ['member', 'student', 'board', 'captain', 'vice_captain'] as const
 const PLAYING_ROLES = ['batter', 'bowler', 'allrounder', 'wicket_keeper'] as const
-
-const ROLE_LABELS: Record<string, string> = {
-  member: 'Member',
-  student: 'Student',
-  board: 'Board',
-  captain: 'Captain',
-  vice_captain: 'Vice Captain',
-}
-
-const PLAYING_ROLE_LABELS: Record<string, string> = {
-  batter: 'Batter',
-  bowler: 'Bowler',
-  allrounder: 'Allrounder',
-  wicket_keeper: 'Wicket Keeper',
-}
 
 interface Props {
   token: string
@@ -84,9 +70,10 @@ export function CreateMemberModal({ token, clubId, apiUrl }: Props) {
       setForm({ fullName: '', email: '', phone: '', playingRole: '', roles: ['member'] })
       toast(`${form.fullName} added as a member`)
       router.refresh()
-    } catch (e: any) {
-      setError(e.message)
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      const msg = toErrorMessage(e)
+      setError(msg)
+      toast(msg, 'error')
     } finally {
       setLoading(false)
     }
@@ -158,15 +145,3 @@ export function CreateMemberModal({ token, clubId, apiUrl }: Props) {
   )
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-zinc-500">
-        {label}{hint && <span className="font-normal"> — {hint}</span>}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-const inputCls = 'w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400'

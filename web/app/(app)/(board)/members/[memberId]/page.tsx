@@ -29,7 +29,7 @@ interface Props {
 export default async function MemberProfilePage({ params }: Props) {
   const { memberId } = await params
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [member, teamAssignments] = await Promise.all([
     api.members.get(token, memberId).catch((e) => { if (e.status === 404) return null; throw e }) as any,

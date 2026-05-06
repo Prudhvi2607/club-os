@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   feeId: string
@@ -47,8 +48,8 @@ export function SubmitPaymentRequestButton({ feeId, memberId, feeName, amountDue
       setOpen(false)
       toast('Payment submitted — waiting for board confirmation')
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setLoading(false)
     }

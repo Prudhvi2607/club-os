@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import mammoth from 'mammoth'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   fileUrl: string
@@ -19,8 +20,8 @@ export function WordPreview({ fileUrl }: Props) {
         const buf = await res.arrayBuffer()
         const result = await mammoth.convertToHtml({ arrayBuffer: buf })
         setHtml(result.value)
-      } catch (e: any) {
-        setError(e.message)
+      } catch (e: unknown) {
+        setError(toErrorMessage(e))
       }
     }
     load()

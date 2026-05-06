@@ -7,7 +7,7 @@ export default async function BoardLayout({ children }: { children: React.ReactN
   const session = await auth()
   if (!session) redirect('/login')
 
-  const me = await api.me((session as any).accessToken ?? '').catch((e) => {
+  const me = await api.me(session.accessToken ?? '').catch((e) => {
     if (e.status === 404) return null
     throw e
   })

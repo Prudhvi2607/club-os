@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 import type { CustomRole } from '@/lib/api'
 
 interface Props {
@@ -36,8 +37,8 @@ export function ManageCustomRoles({ customRoles, token, clubId, apiUrl }: Props)
       setName('')
       toast(`"${name.trim()}" role created`)
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setAdding(false)
     }

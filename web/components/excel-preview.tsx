@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   fileUrl: string
@@ -30,8 +31,8 @@ export function ExcelPreview({ fileUrl }: Props) {
           return { name, rows }
         })
         setSheets(parsed)
-      } catch (e: any) {
-        setError(e.message)
+      } catch (e: unknown) {
+        setError(toErrorMessage(e))
       }
     }
     load()

@@ -21,7 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default async function DocumentsPage() {
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [me, docs] = await Promise.all([
     api.me(token).catch(() => null),

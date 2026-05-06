@@ -28,7 +28,7 @@ export default async function MembersPage({ searchParams }: Props) {
 
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [members, customRoles] = await Promise.all([
     api.members.list(token).catch(() => []),
@@ -38,7 +38,7 @@ export default async function MembersPage({ searchParams }: Props) {
   let filtered = members
 
   if (status) filtered = filtered.filter((m) => m.status === status)
-  if (role) filtered = filtered.filter((m) => m.roles.some((r: any) => r.role === role))
+  if (role) filtered = filtered.filter((m) => m.roles.some((r) => r.role === role))
   if (playingRole) filtered = filtered.filter((m) => m.user.playingRole === playingRole)
 
   filtered = [...filtered].sort((a, b) => {
@@ -83,7 +83,7 @@ export default async function MembersPage({ searchParams }: Props) {
                 <td className="px-4 py-3">
                   <MemberRolesEditor
                     memberId={m.id}
-                    currentRoles={m.roles.map((r: any) => r.role)}
+                    currentRoles={m.roles.map((r) => r.role)}
                     assignedCustomRoles={m.customRoles}
                     allCustomRoles={customRoles}
                     token={token}

@@ -22,7 +22,7 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
 
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const me = await api.me(token).catch(() => null)
   const myUserId = me?.id ?? ''

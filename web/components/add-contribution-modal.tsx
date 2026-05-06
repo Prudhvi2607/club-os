@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Season {
   id: string
@@ -58,8 +59,8 @@ export function AddContributionModal({ sponsorId, sponsorName, seasons, token, a
       setSeasonId('')
       setReceivedAt('')
       onAdded()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(toErrorMessage(err))
     } finally {
       setSaving(false)
     }

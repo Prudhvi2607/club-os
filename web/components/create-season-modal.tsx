@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   token: string
@@ -58,9 +59,10 @@ export function CreateSeasonModal({ token, createdById, clubId, apiUrl }: Props)
       setForm({ year: new Date().getFullYear(), startDate: '', endDate: '', registrationFee: '' })
       toast(`${form.year} season created`)
       router.refresh()
-    } catch (e: any) {
-      setError(e.message)
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      const msg = toErrorMessage(e)
+      setError(msg)
+      toast(msg, 'error')
     } finally {
       setLoading(false)
     }

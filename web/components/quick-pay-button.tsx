@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast-provider'
+import { toErrorMessage } from '@/lib/errors'
 
 interface Props {
   feeId: string
@@ -32,8 +33,8 @@ export function QuickPayButton({ feeId, memberId, memberName, remaining, myUserI
       if (!res.ok) throw new Error('Failed to record payment')
       toast(`$${remaining.toFixed(0)} cash recorded for ${memberName}`)
       router.refresh()
-    } catch (e: any) {
-      toast(e.message, 'error')
+    } catch (e: unknown) {
+      toast(toErrorMessage(e), 'error')
     } finally {
       setLoading(false)
       setConfirming(false)

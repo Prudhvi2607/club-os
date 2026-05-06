@@ -20,7 +20,7 @@ const AUDIENCE_BADGE: Record<string, string> = {
 export default async function AnnouncementsPage() {
   
   const session = await auth()
-  const token = (session as any)?.accessToken ?? ''
+  const token = session.accessToken ?? ''
 
   const [announcements, me, teams] = await Promise.all([
     api.announcements.list(token, { limit: 50 }).catch(() => []),
