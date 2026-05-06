@@ -25,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const latestAnnouncementAt = recentAnnouncements[0]?.sentAt ?? null
 
   if (!me) {
+    const clubName = process.env.NEXT_PUBLIC_CLUB_NAME ?? 'this club'
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
@@ -35,8 +36,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </>
           ) : (
             <>
-              <p className="font-medium">You're not a member of any club yet.</p>
-              <p className="text-sm text-zinc-500">Ask your board to add you to the club.</p>
+              <p className="font-medium">You&apos;re not a member of {clubName} yet.</p>
+              <p className="text-sm text-zinc-500">Ask your board to add you to {clubName}.</p>
             </>
           )}
           <SignOutButton />
