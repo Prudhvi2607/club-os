@@ -12,7 +12,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL!
 export default async function AvailabilityPage() {
   
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [me, seasons] = await Promise.all([
     api.me(token).catch(() => null),

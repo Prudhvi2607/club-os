@@ -10,7 +10,7 @@ export default async function SeasonAvailabilityPage({ params }: { params: Promi
 
   
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [season, seasonAvail] = await Promise.all([
     api.seasons.get(token, seasonId).catch(() => null),

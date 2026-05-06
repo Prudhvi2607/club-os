@@ -18,7 +18,7 @@ const FIXED_LABELS: Record<FixedRole, string> = {
 
 interface Props {
   memberId: string
-  currentRoles: FixedRole[]
+  currentRoles: string[]
   assignedCustomRoles: { id: string; customRole: { id: string; name: string } }[]
   allCustomRoles: CustomRole[]
   token: string
@@ -31,7 +31,7 @@ export function MemberRolesEditor({
 }: Props) {
   const router = useRouter()
   const { toast } = useToast()
-  const [roles, setRoles] = useState<Set<FixedRole>>(new Set(currentRoles))
+  const [roles, setRoles] = useState<Set<FixedRole>>(new Set(currentRoles) as Set<FixedRole>)
   const [busyFixed, setBusyFixed] = useState<FixedRole | null>(null)
   const [busyCustom, setBusyCustom] = useState<string | null>(null)
 

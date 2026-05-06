@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'My Team | club-os' }
 export default async function MyTeamPage() {
   
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [me, seasons] = await Promise.all([
     api.me(token).catch(() => null),

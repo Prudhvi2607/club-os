@@ -19,7 +19,7 @@ export default async function TreasuryPage({ searchParams }: Props) {
   const { seasonId: seasonIdParam } = await searchParams
 
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [seasons, me] = await Promise.all([
     api.seasons.list(token).catch(() => []),

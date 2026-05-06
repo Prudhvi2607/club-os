@@ -101,6 +101,10 @@ export function Sidebar({ isBoard, showPayments = true, latestAnnouncementAt, on
           </div>
         )}
       </nav>
+
+      <div className="mt-auto pt-4 px-2">
+        <p className="text-xs text-zinc-600">v{process.env.NEXT_PUBLIC_APP_VERSION}</p>
+      </div>
     </aside>
   )
 }

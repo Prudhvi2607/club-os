@@ -17,7 +17,7 @@ const FEE_BADGE: Record<string, string> = {
 export default async function RegistrationsPage({ params }: { params: Promise<{ seasonId: string }> }) {
   const { seasonId } = await params
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [season, availData, paymentSummary, feeTypes] = await Promise.all([
     api.seasons.get(token, seasonId).catch(() => null),
