@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 export const ROLES = ['member', 'student', 'board', 'captain', 'vice_captain'] as const
 export type Role = (typeof ROLES)[number]
 
@@ -16,7 +18,7 @@ export const PLAYING_ROLE_LABELS: Record<string, string> = {
   wicket_keeper: 'Wicket Keeper',
 }
 
-export function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <div className="space-y-1">
       <label className="text-xs font-medium text-zinc-500">
