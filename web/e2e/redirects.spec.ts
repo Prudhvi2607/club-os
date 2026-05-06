@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test'
 
+// Run without any session cookie so we test the unauthenticated redirect behaviour
+test.use({ storageState: { cookies: [], origins: [] } })
+
 const protectedRoutes = [
   '/dashboard',
   '/my-team',
