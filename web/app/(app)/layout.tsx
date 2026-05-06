@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await auth()
   if (!session) redirect('/login')
 
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   let me = null
   let apiDown = false

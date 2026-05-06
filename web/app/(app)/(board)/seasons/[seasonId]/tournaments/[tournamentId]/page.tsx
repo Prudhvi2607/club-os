@@ -17,7 +17,7 @@ export default async function TournamentDetailPage({
 
   
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [tournament, season] = await Promise.all([
     api.tournaments.get(token, seasonId, tournamentId).catch((e) => { if (e.status === 404) return null; throw e }),

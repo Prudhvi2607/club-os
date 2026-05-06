@@ -28,7 +28,7 @@ export default async function MembersPage({ searchParams }: Props) {
 
   
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [members, customRoles] = await Promise.all([
     api.members.list(token).catch(() => []),

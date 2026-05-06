@@ -19,7 +19,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default async function MyFeesPage() {
   
   const session = await auth()
-  const token = session.accessToken ?? ''
+  const token = session?.accessToken ?? ''
 
   const [me, seasons] = await Promise.all([
     api.me(token).catch(() => null),
