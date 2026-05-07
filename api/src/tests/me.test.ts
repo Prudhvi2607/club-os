@@ -8,6 +8,8 @@ const m = prisma as any
 
 beforeEach(() => vi.clearAllMocks())
 
+const token = () => `Bearer ${makeToken({ sub: 'supa-1' })}`
+
 const mockUser = {
   id: 'user-1', supabaseId: 'supa-1', email: 'test@example.com', fullName: 'Test User',
   phone: null, avatarUrl: null, playingRole: null, emergencyContactName: null,
@@ -33,8 +35,7 @@ describe('GET /me', () => {
   it('returns user when found by supabaseId', async () => {
     m.user.findFirst.mockResolvedValueOnce(mockUser)
     const app = await buildApp()
-    const token = makeToken({ sub: 'supa-1', email: 'test@example.com' })
-    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${token}` } })
+    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${makeToken({ sub: 'supa-1', email: 'test@example.com' })}` } })
     expect(res.statusCode).toBe(200)
     expect(res.json().email).toBe('test@example.com')
   })
@@ -42,8 +43,7 @@ describe('GET /me', () => {
   it('returns 404 when user not found and no email match', async () => {
     m.user.findFirst.mockResolvedValue(null)
     const app = await buildApp()
-    const token = makeToken({ sub: 'unknown-id', email: 'nobody@example.com' })
-    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${token}` } })
+    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${makeToken({ sub: 'unknown-id', email: 'nobody@example.com' })}` } })
     expect(res.statusCode).toBe(404)
   })
 
@@ -53,11 +53,84 @@ describe('GET /me', () => {
       .mockResolvedValueOnce({ ...mockUser, supabaseId: null, email: 'Test@Example.com' })
     m.user.update.mockResolvedValueOnce(mockUser)
     const app = await buildApp()
-    const token = makeToken({ sub: 'new-supa-id', email: 'test@example.com' })
-    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${token}` } })
+    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${makeToken({ sub: 'new-supa-id', email: 'test@example.com' })}` } })
     expect(res.statusCode).toBe(200)
     expect(m.user.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ supabaseId: 'new-supa-id' }) })
     )
+  })
+})
+
+describe('PATCH /me', () => {
+  it('returns 401 with no token', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'PATCH', url: '/me', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fullName: 'Updated' }) })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when user not found', async () => {
+    m.user.findFirst.mockResolvedValue(null)
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/me',
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ fullName: 'Updated' }),
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('updates profile fields and returns 200', async () => {
+    m.user.findFirst.mockResolvedValue(mockUser)
+    m.user.update.mockResolvedValue({ ...mockUser, fullName: 'Updated Name', phone: '555-1234' })
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/me',
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ fullName: 'Updated Name', phone: '555-1234' }),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().fullName).toBe('Updated Name')
+  })
+
+  it('returns 409 when requested jersey number is taken by another member', async () => {
+    m.user.findFirst
+      .mockResolvedValueOnce(mockUser)
+      .mockResolvedValueOnce({ id: 'user-2' })
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/me',
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ jerseyNumber: 7 }),
+    })
+    expect(res.statusCode).toBe(409)
+    expect(res.json().error).toMatch(/Jersey #7/)
+  })
+
+  it('allows updating own jersey number without conflict', async () => {
+    const userWithJersey = { ...mockUser, jerseyNumber: 7 }
+    m.user.findFirst
+      .mockResolvedValueOnce(userWithJersey)
+      .mockResolvedValueOnce(null)
+    m.user.update.mockResolvedValue(userWithJersey)
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/me',
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ jerseyNumber: 7 }),
+    })
+    expect(res.statusCode).toBe(200)
+  })
+
+  it('skips jersey conflict check when setting jerseyNumber to null', async () => {
+    m.user.findFirst.mockResolvedValue(mockUser)
+    m.user.update.mockResolvedValue({ ...mockUser, jerseyNumber: null })
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/me',
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ jerseyNumber: null }),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(m.user.findFirst).toHaveBeenCalledTimes(1)
   })
 })
