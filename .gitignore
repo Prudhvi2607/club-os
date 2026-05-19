@@ -4,3 +4,6 @@ node_modules/
 dist/
 .next/
 *.tsbuildinfo
+.vercel
+web/test-results/
+package-lock.json

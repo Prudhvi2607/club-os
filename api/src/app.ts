@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import prisma from './lib/prisma.js'
 import authPlugin from './plugins/auth.js'
 import clubAccessPlugin from './plugins/club-access.js'
 import clubsRoutes from './routes/clubs.js'
@@ -18,7 +19,10 @@ import treasuryRoutes from './routes/treasury.js'
 export async function buildApp() {
   const app = Fastify({ logger: false })
 
-  app.get('/health', async () => ({ status: 'ok' }))
+  app.get('/health', async () => {
+    await prisma.$queryRaw`SELECT 1`
+    return { status: 'ok' }
+  })
 
   await app.register(cors, {
     origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:3000',

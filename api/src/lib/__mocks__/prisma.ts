@@ -39,6 +39,7 @@ const prisma = {
   sponsorContribution: makeModel(),
   expense: makeModel(),
   $transaction: vi.fn((fn: any) => fn(prisma)),
+  $queryRaw: vi.fn(),
 }
 
 export default prisma
