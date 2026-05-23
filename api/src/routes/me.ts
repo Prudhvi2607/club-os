@@ -55,11 +55,12 @@ export default async function meRoutes(app: FastifyInstance) {
             },
           },
         })
+        req.log.info({ event: 'first_login', email: user.email, userId: user.id }, 'User logged in for the first time')
       }
     }
 
     if (!user) {
-      req.log.warn({ supabaseId: authUser.id, email: authUser.email }, 'Login attempt from unregistered user')
+      req.log.warn({ event: 'login_unregistered', supabaseId: authUser.id, email: authUser.email }, 'Login attempt from unregistered user')
       return reply.code(404).send({ error: 'No club membership found for this account.' })
     }
 
