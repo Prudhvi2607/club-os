@@ -79,6 +79,31 @@ describe('POST /clubs/:clubId/announcements', () => {
   })
 })
 
+describe('GET /clubs/:clubId/announcements/:announcementId', () => {
+  it('returns announcement with sender and team', async () => {
+    m.announcement.findFirst.mockResolvedValue(mockAnnouncement)
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: `/clubs/${CLUB}/announcements/${ANN_ID}`, headers: { authorization: token() } })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().id).toBe(ANN_ID)
+    expect(res.json().sentBy).toBeDefined()
+  })
+
+  it('returns 404 when announcement not found', async () => {
+    m.announcement.findFirst.mockResolvedValue(null)
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: `/clubs/${CLUB}/announcements/${ANN_ID}`, headers: { authorization: token() } })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns 404 when announcement belongs to a different club', async () => {
+    m.announcement.findFirst.mockResolvedValue(null) // query scopes by clubId — no match
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: `/clubs/other-club/announcements/${ANN_ID}`, headers: { authorization: token() } })
+    expect(res.statusCode).toBe(404)
+  })
+})
+
 describe('DELETE /clubs/:clubId/announcements/:announcementId', () => {
   it('returns 204 on success', async () => {
     m.announcement.findFirst.mockResolvedValue(mockAnnouncement)

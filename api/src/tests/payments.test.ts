@@ -133,6 +133,65 @@ describe('POST /clubs/:clubId/members/:memberId/fees/:feeId/payments', () => {
     })
     expect(m.seasonRegistration.create).toHaveBeenCalled()
   })
+
+  it('reactivates inactive registration when registration fee fully paid', async () => {
+    m.clubMember.findFirst.mockResolvedValue(mockMember)
+    m.memberFee.findFirst.mockResolvedValue({
+      ...mockMemberFee, amountDue: 100, amountPaid: 0,
+      feeType: { ...mockFeeType, isRegistrationFee: true, seasonId: SEASON_ID },
+    })
+    m.payment.create.mockResolvedValue({ id: PAYMENT_ID })
+    m.memberFee.update.mockResolvedValue({})
+    m.seasonRegistration.findFirst.mockResolvedValue({ id: 'reg-1', status: 'inactive' })
+    m.seasonRegistration.update.mockResolvedValue({})
+    const app = await buildApp()
+    await app.inject({
+      method: 'POST', url: `/clubs/${CLUB}/members/${MEMBER_ID}/fees/${FEE_ID}/payments`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ amount: 100, method: 'zelle', recordedById: 'user-1' }),
+    })
+    expect(m.seasonRegistration.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: 'active' }) })
+    )
+    expect(m.seasonRegistration.create).not.toHaveBeenCalled()
+  })
+
+  it('does not auto-register when payment only partially covers registration fee', async () => {
+    m.clubMember.findFirst.mockResolvedValue(mockMember)
+    m.memberFee.findFirst.mockResolvedValue({
+      ...mockMemberFee, amountDue: 100, amountPaid: 0,
+      feeType: { ...mockFeeType, isRegistrationFee: true, seasonId: SEASON_ID },
+    })
+    m.payment.create.mockResolvedValue({ id: PAYMENT_ID })
+    m.memberFee.update.mockResolvedValue({})
+    m.seasonRegistration.findFirst.mockResolvedValue(null)
+    const app = await buildApp()
+    await app.inject({
+      method: 'POST', url: `/clubs/${CLUB}/members/${MEMBER_ID}/fees/${FEE_ID}/payments`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ amount: 60, method: 'zelle', recordedById: 'user-1' }),
+    })
+    expect(m.seasonRegistration.create).not.toHaveBeenCalled()
+  })
+
+  it('overpayment: marks fee as paid and records amountPaid above amountDue', async () => {
+    m.clubMember.findFirst.mockResolvedValue(mockMember)
+    m.memberFee.findFirst.mockResolvedValue({ ...mockMemberFee, amountDue: 100, amountPaid: 0 })
+    m.payment.create.mockResolvedValue({ id: PAYMENT_ID })
+    m.memberFee.update.mockResolvedValue({})
+    m.seasonRegistration.findFirst.mockResolvedValue(null)
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: `/clubs/${CLUB}/members/${MEMBER_ID}/fees/${FEE_ID}/payments`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ amount: 150, method: 'zelle', recordedById: 'user-1' }),
+    })
+    expect(res.statusCode).toBe(201)
+    // No guard: overpayment is accepted and fee is still marked paid
+    expect(m.memberFee.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: 'paid', amountPaid: 150 }) })
+    )
+  })
 })
 
 describe('DELETE /clubs/:clubId/members/:memberId/fees/:feeId/payments/:paymentId', () => {
@@ -405,8 +464,8 @@ describe('PATCH /clubs/:clubId/payment-requests/:requestId', () => {
     expect(res.json().status).toBe('rejected')
   })
 
-  it('confirms request and records payment', async () => {
-    m.paymentRequest.findFirst.mockResolvedValue(mockRequest)
+  it('confirms request and marks fee paid when request covers full amount', async () => {
+    m.paymentRequest.findFirst.mockResolvedValue(mockRequest) // amount: 100, amountDue: 100, amountPaid: 0
     m.paymentRequest.update.mockResolvedValue({})
     m.payment.create.mockResolvedValue({})
     m.memberFee.update.mockResolvedValue({})
@@ -419,5 +478,37 @@ describe('PATCH /clubs/:clubId/payment-requests/:requestId', () => {
     expect(res.statusCode).toBe(200)
     expect(res.json().status).toBe('confirmed')
     expect(m.payment.create).toHaveBeenCalled()
+    expect(m.memberFee.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: 'paid', amountPaid: 100 }) })
+    )
+  })
+
+  it('confirms partial request and sets fee to partial status', async () => {
+    const partialRequest = { ...mockRequest, amount: 40, memberFee: { amountPaid: 0, amountDue: 100 } }
+    m.paymentRequest.findFirst.mockResolvedValue(partialRequest)
+    m.paymentRequest.update.mockResolvedValue({})
+    m.payment.create.mockResolvedValue({})
+    m.memberFee.update.mockResolvedValue({})
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: `/clubs/${CLUB}/payment-requests/${REQ_ID}`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'confirm', recordedById: 'user-1' }),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(m.memberFee.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: 'partial', amountPaid: 40 }) })
+    )
+  })
+
+  it('already-rejected request returns 409', async () => {
+    m.paymentRequest.findFirst.mockResolvedValue({ ...mockRequest, status: 'rejected' })
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: `/clubs/${CLUB}/payment-requests/${REQ_ID}`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'confirm', recordedById: 'user-1' }),
+    })
+    expect(res.statusCode).toBe(409)
   })
 })

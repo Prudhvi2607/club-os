@@ -234,13 +234,40 @@ describe('DELETE /clubs/:clubId/members/:memberId/roles/:role', () => {
   })
 })
 
+describe('POST /clubs/:clubId/members/:memberId/roles — duplicate prevention', () => {
+  it('allows assigning board role to a member with no conflicting roles', async () => {
+    m.clubMember.findFirst.mockResolvedValue({ ...mockMember, roles: [] })
+    m.clubMemberRole.create.mockResolvedValue({ id: 'r-1', role: 'board' })
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: `/clubs/${CLUB}/members/${MEMBER_ID}/roles`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ role: 'board' }),
+    })
+    expect(res.statusCode).toBe(201)
+  })
+
+  it('allows assigning captain when member has board role', async () => {
+    m.clubMember.findFirst.mockResolvedValue({ ...mockMember, roles: [{ role: 'board' }] })
+    m.clubMemberRole.create.mockResolvedValue({ id: 'r-2', role: 'captain' })
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: `/clubs/${CLUB}/members/${MEMBER_ID}/roles`,
+      headers: { authorization: token(), 'content-type': 'application/json' },
+      body: JSON.stringify({ role: 'captain' }),
+    })
+    expect(res.statusCode).toBe(201)
+  })
+})
+
 describe('DELETE /clubs/:clubId/members/:memberId', () => {
-  it('returns 204 on success', async () => {
+  it('returns 204 on success and calls delete with correct id', async () => {
     m.clubMember.findFirst.mockResolvedValue(mockMember)
     m.clubMember.delete.mockResolvedValue(mockMember)
     const app = await buildApp()
     const res = await app.inject({ method: 'DELETE', url: `/clubs/${CLUB}/members/${MEMBER_ID}`, headers: { authorization: token() } })
     expect(res.statusCode).toBe(204)
+    expect(m.clubMember.delete).toHaveBeenCalledWith({ where: { id: MEMBER_ID } })
   })
 
   it('returns 404 when not found', async () => {
@@ -248,6 +275,14 @@ describe('DELETE /clubs/:clubId/members/:memberId', () => {
     const app = await buildApp()
     const res = await app.inject({ method: 'DELETE', url: `/clubs/${CLUB}/members/${MEMBER_ID}`, headers: { authorization: token() } })
     expect(res.statusCode).toBe(404)
+  })
+
+  it('does not delete a member belonging to a different club', async () => {
+    m.clubMember.findFirst.mockResolvedValue(null) // query scopes by clubId
+    const app = await buildApp()
+    const res = await app.inject({ method: 'DELETE', url: `/clubs/other-club/members/${MEMBER_ID}`, headers: { authorization: token() } })
+    expect(res.statusCode).toBe(404)
+    expect(m.clubMember.delete).not.toHaveBeenCalled()
   })
 })
 
