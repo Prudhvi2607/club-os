@@ -53,11 +53,24 @@ describe('GET /me', () => {
       .mockResolvedValueOnce({ ...mockUser, supabaseId: null, email: 'Test@Example.com' })
     m.user.update.mockResolvedValueOnce(mockUser)
     const app = await buildApp()
+    const logs: any[] = []
+    app.log.info = (obj: any) => logs.push(obj)
     const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${makeToken({ sub: 'new-supa-id', email: 'test@example.com' })}` } })
     expect(res.statusCode).toBe(200)
     expect(m.user.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ supabaseId: 'new-supa-id' }) })
     )
+    expect(logs.some(l => l.event === 'first_login' && l.email === 'test@example.com')).toBe(true)
+  })
+
+  it('logs login_unregistered warn when no match found', async () => {
+    m.user.findFirst.mockResolvedValue(null)
+    const app = await buildApp()
+    const warns: any[] = []
+    app.log.warn = (obj: any) => warns.push(obj)
+    const res = await app.inject({ method: 'GET', url: '/me', headers: { authorization: `Bearer ${makeToken({ sub: 'ghost-id', email: 'nobody@example.com' })}` } })
+    expect(res.statusCode).toBe(404)
+    expect(warns.some(w => w.event === 'login_unregistered' && w.email === 'nobody@example.com')).toBe(true)
   })
 })
 
