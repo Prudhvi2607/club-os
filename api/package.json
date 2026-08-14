@@ -10,7 +10,8 @@
     "setup": "node --import tsx/esm src/setup.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "node --import tsx/esm prisma/seed.ts"
+    "seed": "node --import tsx/esm prisma/seed.ts",
+    "migrate-supabase": "node --import tsx/esm prisma/migrate-from-supabase.ts"
   },
   "keywords": [],
   "author": "",
